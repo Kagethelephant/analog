@@ -16,10 +16,4 @@ enum class Color : unsigned int {
 };
 
 /// @brief: Converts hexidecimal color to vec4 with float values from 0-1
-vec4 hexColorToFloat(const Color hexValue);
-
-/// @brief: Converts hexidecimal color to vec4 with values from 0-256
-vec4 hexColorToRGB(const Color color);
-
-
-
+vec4 getColor(const Color hexValue);

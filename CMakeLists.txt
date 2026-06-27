@@ -22,15 +22,15 @@ add_subdirectory(lib/freeType)
 # Combine all the source files under SOURCE_FILES variable
 set(SOURCE_FILES
    lib/glad/src/glad.c
-   src/app/main.cpp
-   src/app/object.cpp
+   src/main.cpp
+   src/world/object.cpp
+   src/world/camera.cpp
+   src/window/window.cpp
+   src/window/text.cpp
+   src/render/render.cpp
+   src/shaders/shader.cpp
    src/utils/data.cpp
    src/utils/matrix.cpp
-   src/cpuRender/cpuRender.cpp
-   src/gpuRender/window.cpp
-   src/gpuRender/gpuRender.cpp
-   src/gpuRender/text.cpp
-   src/shaders/shader.cpp
 )
 
 # Creates executable from source files

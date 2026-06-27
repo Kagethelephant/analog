@@ -261,6 +261,22 @@ mat4x4 matrix_scale(float sx, float sy, float sz);
 ///
 mat4x4 matrix_transform(float x, float y, float z, float u, float v, float w);
 
+/// @brief: Creates a 4x4 matrix that can be used to rotate (in radians) a vertex 
+/// @param u: u rotation around origin in radians
+/// @param v: v rotation around origin in radians
+/// @param w: w rotation around origin in radians
+/// @return mat4x4
+///
+mat4x4 matrix_rotate(float u, float v, float w);
+
+/// @brief: Creates a 4x4 matrix that can be used to translate a vertex 
+/// @param x: x translation
+/// @param y: y translation
+/// @param z: z translation
+/// @return mat4x4
+///
+mat4x4 matrix_translate(float x, float y, float z);
+
 /// @brief: Creates the 3d projection matrix that transforms a 3D vertex to screen space
 /// @param fov: Field of view in degrees
 /// @param a: Aspect ratio of the display
