@@ -114,8 +114,7 @@ void gpuRenderEngine::render(){
       glUniform3fv(glGetUniformLocation(m_shaderProgram3D, "lightCol"),lightCount,&m_lightColors[0]);
 
       glUniform3fv(glGetUniformLocation(m_shaderProgram3D, "objCol"),1,&color[0]);
-      glUniformMatrix4fv(glGetUniformLocation(m_shaderProgram3D, "scale"),1,GL_FALSE,&objRef.getScaleMatrix().m[0][0]);
-      glUniformMatrix4fv(glGetUniformLocation(m_shaderProgram3D, "transform"),1,GL_FALSE,&objRef.getTransformMatrix().m[0][0]);
+      glUniformMatrix4fv(glGetUniformLocation(m_shaderProgram3D, "model"),1,GL_FALSE,&objRef.getModelMatrix()[0][0]);
       
 
       for (const gpuSubMesh& sub : gpuObject.subMeshes) {

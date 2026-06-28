@@ -2,10 +2,14 @@
 // Project Libraries
 #include "utils/data.hpp"
 #include "utils/matrix.hpp"
-#include "window/window.hpp"
 // Standard Libraries
 #include <vector>
 #include <unordered_map>
+
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+#include <glm/gtc/quaternion.hpp>
 
 
 
@@ -120,11 +124,10 @@ public:
    /// @brief: Create object with model reference for geometry
    /// @param model: Model object references for geometry
    object(model& model) : m_model{model} {
-      m_position = vec3(0,0,0);
-      m_rotation = vec3(0,0,0);
-      m_scale = vec3(1,1,1);
-      m_transformMatrix = matrix_transform(m_position[0], m_position[1], m_position[2], m_rotation[0], m_rotation[1], m_rotation[2]);
-      m_scaleMatrix = matrix_scale(m_scale[0], m_scale[1], m_scale[2]);
+      m_position = glm::vec3(0,0,0);
+      m_rotation = glm::vec3(0,0,0);
+      m_scale = glm::vec3(1,1,1);
+      glm::mat4 m_modelMatrix = glm::mat4(1.0f);
    };
 
 
@@ -146,6 +149,7 @@ public:
    /// @param w: rotation in radians about z axis
    void rotate(float u, float v, float w);
 
+   void updateModelMatrix();
 
    /// @brief: Set color of object that will be drawn if the model does not have a texture
    /// @param _color: color as Color enum: 4 channel hexadecimal color
@@ -153,9 +157,7 @@ public:
    /// @brief: get object color as Color enum: 4 channel hexadecimal color
    Color color() const {return (m_color);};
    /// @brief: get object transformation matrix
-   const mat4x4& getTransformMatrix() const {return (m_transformMatrix);};
-   /// @brief: get object scale matrix
-   const mat4x4& getScaleMatrix() const {return (m_scaleMatrix);};
+   const glm::mat4& getModelMatrix() const {return (m_modelMatrix);};
    /// @brief: Get model referenced by this object
    const model& getModel() const {return (m_model);};
 
@@ -164,16 +166,14 @@ private:
    /// @brief: Base color to draw the object (this will be shaded by the camera)
    Color m_color = Color::White;
    /// @brief: Coordinates of the object origin in 3D space
-   vec3 m_position = vec3(0,0,0);
+   glm::vec3 m_position = glm::vec3(0,0,0);
    /// @brief: Rotation from original orientation in radians
-   vec3 m_rotation = vec3(0,0,0);
+   glm::vec3 m_rotation = glm::vec3(0,0,0);
    /// @brief: Scale of the object
-   vec3 m_scale = vec3(1,1,1);
+   glm::vec3 m_scale = glm::vec3(1,1,1);
 
-   /// @brief: Transform matrix used in the vertex shader of the rendering pipeline
-   mat4x4 m_transformMatrix;
-   /// @brief: Scale matrix used in the vertex shader of the rendering pipeline
-   mat4x4 m_scaleMatrix;
+   /// @brief: model matrix used in the vertex shader of the rendering pipeline
+   glm::mat4 m_modelMatrix;
 
    /// @brief: Reference to object model (geometry and texture data)
    model& m_model;

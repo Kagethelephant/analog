@@ -6,7 +6,6 @@
 // Standard Libraries
 #include <iostream>
 #include <math.h>
-#include "utils/matrix.hpp"
 #include <fstream>
 #include <sstream>
 #include <algorithm>
@@ -22,23 +21,31 @@
 //---------------------- OBJECT TRANSFORMATIONS ----------------------
 
 void object::scale(float sx, float sy, float sz){
-   m_scale = vec3(sx,sy,sz);
-   m_scaleMatrix = matrix_scale(m_scale[0], m_scale[1], m_scale[2]);
+    m_scale = glm::vec3(sx, sy, sz);
+    updateModelMatrix();
 }
-
-
 void object::move(float x, float y, float z){
-   m_position += vec3(x,y,z);
-   m_transformMatrix = matrix_transform(m_position[0], m_position[1], m_position[2], m_rotation[0], m_rotation[1], m_rotation[2]);
+    m_position += glm::vec3(x, y, z);
+    updateModelMatrix();
 }
-
-
 void object::rotate(float u, float v, float w){
-   m_rotation += vec3(u,v,w);
-   m_transformMatrix = matrix_transform(m_position[0], m_position[1], m_position[2], m_rotation[0], m_rotation[1], m_rotation[2]);
+    m_rotation += glm::vec3(u, v, w);
+    updateModelMatrix();
 }
 
+void object::updateModelMatrix()
+{
+    glm::mat4 T = glm::translate(glm::mat4(1.0f), m_position);
 
+    glm::mat4 R(1.0f);
+    R = glm::rotate(R, m_rotation.x, glm::vec3(1,0,0));
+    R = glm::rotate(R, m_rotation.y, glm::vec3(0,1,0));
+    R = glm::rotate(R, m_rotation.z, glm::vec3(0,0,1));
+
+    glm::mat4 S = glm::scale(glm::mat4(1.0f), m_scale);
+
+    m_modelMatrix = T * R * S;
+}
 
 
 //---------------------- LOAD MODEL FROM OBJ FILE ----------------------
@@ -52,8 +59,8 @@ model::model(const std::string& filename, bool cwWinding) {
    std::string dir = getDirectory(filename);
 
    // Raw OBJ attribute streams
-   std::vector<vec3> objPositions;
-   std::vector<vec2> objTexcoords;
+   std::vector<glm::vec3> objPositions;
+   std::vector<glm::vec2> objTexcoords;
 
    // hash table mapping a combination of position and texture indexes to a vertex object 
    // in the vertex vector arry (vertices) vertexKeyHash is the callable struct to generate hash
@@ -70,14 +77,14 @@ model::model(const std::string& filename, bool cwWinding) {
 
       // ---------- POSITION ----------
       if (type == "v") {
-         vec3 p;
+         glm::vec3 p;
          stream >> p.x >> p.y >> p.z;
          objPositions.push_back(p);
       }
 
       // ---------- TEXCOORD ----------
       else if (type == "vt") {
-         vec2 uv;
+         glm::vec2 uv;
          stream >> uv.x >> uv.y;
          objTexcoords.push_back(uv);
       }
@@ -174,12 +181,12 @@ model::model(const std::string& filename, bool cwWinding) {
                   uint32_t newIndex = static_cast<uint32_t>(m_vertices.size()/5);
 
                   // vertex has not been created, so create it and add the position and texture data if it exists
-                  m_vertices.push_back(objPositions[correctedKeyV].c[0]);
-                  m_vertices.push_back(objPositions[correctedKeyV].c[1]);
-                  m_vertices.push_back(objPositions[correctedKeyV].c[2]);
+                  m_vertices.push_back(objPositions[correctedKeyV].x);
+                  m_vertices.push_back(objPositions[correctedKeyV].y);
+                  m_vertices.push_back(objPositions[correctedKeyV].z);
                   if (currentMesh.textured){
-                     m_vertices.push_back(objTexcoords[correctedKeyT].c[0]);
-                     m_vertices.push_back(objTexcoords[correctedKeyT].c[1]);
+                     m_vertices.push_back(objTexcoords[correctedKeyT].x);
+                     m_vertices.push_back(objTexcoords[correctedKeyT].y);
                   }
                   else {
                      m_vertices.push_back(0.0f);

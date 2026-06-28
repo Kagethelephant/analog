@@ -16,6 +16,8 @@ enable_language(C) # This enables comiling for the glad library written in C
 
 # Add GLFW CMake source location
 add_subdirectory(lib/GLFW)
+# Add glm CMake source location
+add_subdirectory(lib/glm)
 # Add GLFW CMake source location
 add_subdirectory(lib/freeType)
 
@@ -40,6 +42,7 @@ add_executable(${PROJECT_NAME} ${SOURCE_FILES})
 target_include_directories(${PROJECT_NAME} PRIVATE 
    ${CMAKE_SOURCE_DIR}/src
    ${CMAKE_SOURCE_DIR}/lib/glad/include
+   ${CMAKE_SOURCE_DIR}/lib/glm
    ${CMAKE_SOURCE_DIR}/lib/stb_image
    ${CMAKE_SOURCE_DIR}/lib/freeType/include
 )
