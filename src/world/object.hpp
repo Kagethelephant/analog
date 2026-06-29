@@ -1,10 +1,10 @@
 #pragma once
 // Project Libraries
 #include "utils/data.hpp"
-#include "utils/matrix.hpp"
 // Standard Libraries
 #include <vector>
 #include <unordered_map>
+#include <string>
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -20,9 +20,9 @@ struct light {
    /// @brief: Create light with starting pos and color
    /// @param pos: position of the light in world space
    /// @param col: RGB light color/intensity (0–1 range)
-   light (const vec3& pos, const vec3& col = vec3(1,1,1)) : position{pos}, color{col} {}
-   vec3 position;
-   vec3 color;
+   light (const glm::vec3& pos, const glm::vec3& col = glm::vec3(1,1,1)) : position{pos}, color{col} {}
+   glm::vec3 position;
+   glm::vec3 color;
 };
 
 

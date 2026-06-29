@@ -9,7 +9,9 @@
 
 
 
-surface::surface(int w, int h){
+
+void surface::initialize(int w, int h) {
+
    m_width = w;
    m_height = h;
 
@@ -70,22 +72,27 @@ surface::surface(int w, int h){
    GLenum buffers[] = { GL_COLOR_ATTACHMENT0 };
    glDrawBuffers(1, buffers);
 
-   if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-      std::cout << "Surface FBO incomplete\n";
+   if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) std::cout << "Surface FBO incomplete\n";
+
+
+   initialized = true;
 }
 
-
 void surface::size(int w, int h){
-   m_width = w;
-   m_height = h;
-   {
-      GLScopedTexture2D tempTexture(m_colorTex);
-      glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, m_width, m_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
+   if (initialized){
+
+      m_width = w;
+      m_height = h;
+      {
+         GLScopedTexture2D tempTexture(m_colorTex);
+         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, m_width, m_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
+      }
+      {
+         GLScopedTexture2D tempDepth(m_depthTex);
+         glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT32F, m_width, m_height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
+      }
    }
-   {
-      GLScopedTexture2D tempDepth(m_depthTex);
-      glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT32F, m_width, m_height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
-   }
+   else initialize(w, h);
 }
 
 

@@ -7,7 +7,6 @@
 #include "window/text.hpp"
 #include "window/window.hpp"
 #include "render/render.hpp"
-#include "utils/matrix.hpp"
 // Standard Libraries
 #include <math.h>
 #include <string>
@@ -18,7 +17,7 @@ int main(int argc, char* argv[]){
 
    //------------------- INITIALIZE WINDOW RESOURCES ----------------------
    window programWindow(800);
-   camera userCamera(programWindow);
+   camera userCamera;
    // Base camera movement speeds (scaled by frame time in the main loop)
    double posSpeed = 10.0f; // Position units / sec
    double rotSpeed = 3.0f;  // Radians / sec
@@ -41,12 +40,12 @@ int main(int argc, char* argv[]){
    cube.color(Color::Yellow);
 
    // Light position and RGB color (0–1 range)
-   light redLight(vec3(15,5,5),vec3(0.6,0.3,0.3));
-   light blueLight(vec3(-15,5,5),vec3(0.3,0.3,0.6));
+   light redLight(glm::vec3(15,5,5),glm::vec3(0.6,0.3,0.3));
+   light blueLight(glm::vec3(-15,5,5),glm::vec3(0.3,0.3,0.6));
 
    //------------------- BIND OBJECTS AND LIGHTS TO RENDERERS ------------------------
    // Pass same camera, objects, and lights to both renderers to mirror screen output between the two
-   gpuRenderEngine gpuRend(userCamera);
+   gpuRenderEngine gpuRend(userCamera, programWindow);
    gpuRend.bindObject(arcanineObj);
    gpuRend.bindObject(cube);
 
@@ -68,13 +67,13 @@ int main(int argc, char* argv[]){
       if (programWindow.checkKey(GLFW_KEY_W)) {userCamera.move(0, 0, posDelta);}
       if (programWindow.checkKey(GLFW_KEY_A)) {userCamera.move(-posDelta, 0, 0);}
       if (programWindow.checkKey(GLFW_KEY_D)) {userCamera.move(posDelta, 0, 0);}
-      if (programWindow.checkKey(GLFW_KEY_LEFT)) {userCamera.rotate(0, -rotDelta, 0);}
-      if (programWindow.checkKey(GLFW_KEY_RIGHT)) {userCamera.rotate(0, rotDelta, 0);}
+      if (programWindow.checkKey(GLFW_KEY_LEFT)) {userCamera.rotate(0, rotDelta, 0);}
+      if (programWindow.checkKey(GLFW_KEY_RIGHT)) {userCamera.rotate(0, -rotDelta, 0);}
       if (programWindow.checkKey(GLFW_KEY_UP)) {userCamera.rotate(rotDelta, 0, 0);}
       if (programWindow.checkKey(GLFW_KEY_DOWN)) {userCamera.rotate(-rotDelta, 0, 0);}
 
       // Update the resolution per fram in case the window changes size
-      const vec2& resolution = programWindow.getFboSize();
+      const glm::vec2& resolution = programWindow.getFboSize();
 
       //------------------- RENDER PIPELINE ------------------------
       gpuRend.render();

@@ -9,7 +9,6 @@
 #include "utils/data.hpp"
 #include "window.hpp"
 #include "shaders/shader.hpp"
-#include "utils/matrix.hpp"
 // Freetype Library
 #include <ft2build.h>
 #include FT_FREETYPE_H
@@ -47,8 +46,8 @@ private:
    /// @brief: Groups the OpenGL texture its size and the character bearing and advance
    struct character{
       GLuint textureID;
-      vec2 size;
-      vec2 bearing;  // Position from the top-left of the theoretical pen position
+      glm::vec2 size;
+      glm::vec2 bearing;  // Position from the top-left of the theoretical pen position
       int advance;   // Distance between this character and the next
    };
 

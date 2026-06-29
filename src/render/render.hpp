@@ -4,6 +4,7 @@
 #include "world/object.hpp"
 #include "world/camera.hpp"
 #include "shaders/shader.hpp"
+#include "surface.hpp"
 // OpenGL
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
@@ -24,9 +25,7 @@ public:
 
    /// @brief: Create new GPU rendering engine
    /// @param cam: Camera to reference for view matrix and window size
-   gpuRenderEngine(camera& cam) : m_camera{cam}, m_window{cam.getWindow()}{
-      m_shaderProgram3D = createShaderProgram("../src/shaders/3d_vertex.glsl", "../src/shaders/3d_fragment.glsl");
-   };
+   gpuRenderEngine(camera& cam, const window& win);
 
    /// @brief: Load object data to GPU and memory to render in loop with "render"
    /// @param obj: Object to load
@@ -50,6 +49,8 @@ private:
    
    /// @brief: OpenGL shader program comprised of vertex and fragment shaders pulled from the .glsl files
    GLuint m_shaderProgram3D;
+   /// @brief: Shader program to render 2D quads with textures
+   GLuint shaderProgramUI;
 
    /// @brief: Sub mesh parsed from object submeshes on load. Meshes are uploaded to GPU one time to reduce overhead.
    /// This struct groups the gpu data like mesh textures and ebo (indices) to reference during rendering
@@ -78,6 +79,14 @@ private:
 
    const window& m_window;
    camera& m_camera;
+
+   surface renderSurface;
+
+   GLuint m_quadVao;
+   GLuint m_quadVbo;
+
+
+   std::vector<float> m_quad;
 
 };
 

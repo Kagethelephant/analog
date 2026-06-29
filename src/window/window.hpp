@@ -1,8 +1,8 @@
 #pragma once
-#include "utils/matrix.hpp"
 // OpenGL
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
+#include <glm/glm.hpp>
 // Standard Libraries
 #include <vector>
 #include <unordered_map>
@@ -22,20 +22,24 @@ public:
 
    void frameUpdate();
 
-   void resize();
+   // void resize();
 
-   void setFboHeight(int height) {
-      aspectRatio = float(windowSize.x) / float(windowSize.y);
-      fboSize.y = height;
-      fboSize.x = int(fboSize.y * aspectRatio);
-      resize();
-   }
+   // void setFboHeight(int height) {
+   //    aspectRatio = float(windowSize.x) / float(windowSize.y);
+   //    fboSize.y = height;
+   //    fboSize.x = int(fboSize.y * aspectRatio);
+   //    // resize();
+   // }
 
    GLuint getFbo() const { return fbo;}
    GLuint getColorTexture() const { return colorTex;}
+   GLuint getVao() const { return UIvao;}
    float getAspectRatio() const { return aspectRatio;}
-   const vec2& getFboSize() const { return fboSize;}
-   const vec2& getWindowSize() const { return windowSize;}
+   const glm::vec2& getFboSize() const { return fboSize;}
+   const glm::vec2& getWindowSize() const { return windowSize;}
+
+
+   GLFWwindow* getHandle() {return win;}
 
    bool shouldClose() const {return glfwWindowShouldClose(win);}
    double getFrameElapsedTime() const {return frameTime;}
@@ -47,8 +51,8 @@ private:
 
    GLFWwindow* win;
 
-   vec2 fboSize;
-   vec2 windowSize;
+   glm::vec2 fboSize;
+   glm::vec2 windowSize;
 
    float aspectRatio;
 

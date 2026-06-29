@@ -30,9 +30,9 @@ set(SOURCE_FILES
    src/window/window.cpp
    src/window/text.cpp
    src/render/render.cpp
+   src/render/surface.cpp
    src/shaders/shader.cpp
    src/utils/data.cpp
-   src/utils/matrix.cpp
 )
 
 # Creates executable from source files

@@ -3,39 +3,42 @@
 #include <glad/glad.h>
 #include <GL/gl.h>
 #include <GLFW/glfw3.h>
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 // Standard Libraries
 #include <math.h>
-#include "utils/matrix.hpp"
 
 
 
 
 //---------------------- CAMERA MOVEMENT ----------------------
-void camera::move(float x, float y, float z) {
-   // Transform the world-space up vector by the camera's rotation
-   vec3 up = (matrix_rotate(m_rotation[0], m_rotation[1], m_rotation[2]) * vec4(0,1,0,1)).xyz();
-   // Move along camera's right vector
-   // use cross product of up and forward vector to get the the right vector
-   m_position += (m_direction.cross(up) * x);
-   // Movement in z and y is the same: not world axis but relative to camera direction 
-   m_position += m_direction * z;
-   m_position += up * y;
-
-   // Updated view matrix will be referenced by renderer
-   m_viewMatrix = matrix_view(matrix_pointAt(m_position, m_direction, up));
+void camera::move(float x, float y, float z){
+   m_position += m_right * x;
+   m_position += m_up * y;
+   m_position += m_forward * z;
+   updateView();
 }
 
-void camera::rotate(float u, float v, float w) {
-   m_rotation += vec3(u, v, w);
-   vec3 up = (matrix_rotate(m_rotation[0], m_rotation[1], m_rotation[2]) * vec4(0,1,0,1)).xyz();
-   m_direction = (matrix_rotate(m_rotation[0], m_rotation[1],m_rotation[2]) * vec4(0,0,-1,1)).xyz() ;
-   // Updated view matrix will be referenced by renderer
-   m_viewMatrix = matrix_view(matrix_pointAt(m_position, m_direction, up));
+void camera::rotate(float u, float v, float w){
+   m_rotation += glm::vec3(u, v, w);
+   updateView();
 }
 
-void camera::updateView(){
-   if (m_aspectRatio != m_window.getAspectRatio()){
-      m_aspectRatio = m_window.getAspectRatio();
-      m_projectionMatrix = matrix_project(m_fov, m_aspectRatio,m_near,m_far);  
-   }
+
+void camera::updateView()
+{
+
+   glm::mat4 rotation(1.0f);
+
+   rotation = glm::rotate(rotation,m_rotation.y,glm::vec3(0.0f,1.0f,0.0f));
+   rotation = glm::rotate(rotation,m_rotation.x,glm::vec3(1.0f,0.0f,0.0f));
+   rotation = glm::rotate(rotation,m_rotation.z,glm::vec3(0.0f,0.0f,1.0f));
+
+   m_forward = glm::normalize(glm::vec3(rotation * glm::vec4(0,0,-1,0)));
+   m_right = glm::normalize(glm::cross(m_forward, glm::vec3(0,1,0)));
+   m_up = glm::normalize(glm::cross(m_right, m_forward));
+
+   m_viewMatrix = glm::lookAt(m_position,m_position + m_forward,m_up);
 }
+

@@ -6,14 +6,14 @@
 // Standard Libraries
 #include <vector>
 // Project Headers
-#include "utils/matrix.hpp"
 
 
 
 class surface{
 public:
 
-   surface(int w, int h);
+   surface(int w, int h){ initialize(w, h); }
+   surface(){};
    ~surface();
 
    void size(int w, int h);
@@ -24,8 +24,11 @@ public:
 
 private:
 
+   void initialize(int w, int h);
+
    int m_height;
    int m_width;
+   bool initialized = false;
 
    GLuint m_fbo = 0;
    GLuint m_colorTex = 0;

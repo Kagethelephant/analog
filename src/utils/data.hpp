@@ -1,6 +1,6 @@
 #pragma once
 
-#include "matrix.hpp"
+#include <glm/glm.hpp>
 
 
 enum class Color : unsigned int {
@@ -16,4 +16,4 @@ enum class Color : unsigned int {
 };
 
 /// @brief: Converts hexidecimal color to vec4 with float values from 0-1
-vec4 getColor(const Color hexValue);
+glm::vec4 getColor(const Color hexValue);

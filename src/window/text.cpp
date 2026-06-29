@@ -6,7 +6,6 @@
 #include "window.hpp"
 #include "render/RAIIWrapper.hpp"
 #include "utils/data.hpp"
-#include "utils/matrix.hpp"
 // FreeType Library
 #include <ft2build.h>
 #include FT_FREETYPE_H
@@ -65,8 +64,8 @@ textRenderEngine::textRenderEngine(window& win, const char* fontPath) : m_window
       // advance - how much to move to the right before drawing next character
       character character = {
          texture,
-         vec2(m_fontFace->glyph->bitmap.width, m_fontFace->glyph->bitmap.rows),
-         vec2(m_fontFace->glyph->bitmap_left, m_fontFace->glyph->bitmap_top),
+         glm::vec2(m_fontFace->glyph->bitmap.width, m_fontFace->glyph->bitmap.rows),
+         glm::vec2(m_fontFace->glyph->bitmap_left, m_fontFace->glyph->bitmap_top),
          static_cast<int>(m_fontFace->glyph->advance.x)
       };
 
@@ -97,9 +96,9 @@ textRenderEngine::~textRenderEngine(){
 void textRenderEngine::RenderText(std::string text, float x, float y, Color col){
 
    // Convert hex color to normalized RGB (0–1 range)
-   vec3 color = getColor(col).xyz();
+   glm::vec3 color = getColor(col);
 
-   const vec2& resolution = m_window.getFboSize();
+   const glm::vec2& resolution = m_window.getFboSize();
    // Bind window FBO to draw to and set viewport to match
    GLScopedFBO tempFBO(m_window.getFbo());
    GLScopedViewport tempViewPort(0, 0, resolution.x, resolution.y);

@@ -1,8 +1,8 @@
 #include "data.hpp"
 
 
-vec4 getColor(const Color color) {
-   vec4 floatColor; // (0-1)
+glm::vec4 getColor(const Color color) {
+   glm::vec4 floatColor; // (0-1)
    unsigned int hexValue = static_cast<unsigned int>(color);
    // Extract the R, G, B, and A bytes using bit shifting and masking
    floatColor[0] = ((hexValue >> 24) & 0xFF)/256.0f; // Extract the AA byte

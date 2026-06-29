@@ -1,8 +1,10 @@
 
 #pragma once
 // Project Libraries
-#include "utils/matrix.hpp"
+#include "glm/ext/matrix_clip_space.hpp"
 #include "window/window.hpp"
+
+#include <glm/glm.hpp>
 
 
 
@@ -18,12 +20,9 @@ public:
    /// @brief: Create camera associated with window
    /// @param win: window the camera renders to (used to obtain viewport aspect ratio)
    /// @param fov: vertical field of view of the camera in degrees
-   camera(window& win, float fov = 70) : m_window(win), m_fov(fov) { 
-      m_aspectRatio = m_window.getAspectRatio();
-      m_projectionMatrix = matrix_project(m_fov, m_aspectRatio,m_near,m_far);  
-      // Call move and rotate on creation to initialize view matrix
-      move(0,0,0); 
-      rotate(0,0,0);
+   camera(float ar = 1, float fov = 70) : m_aspectRatio(ar), m_fov(fov){
+      m_projectionMatrix = glm::perspective(glm::radians(m_fov),m_aspectRatio,m_near,m_far);
+      updateView();
    }
 
    /// @brief: Moves camera according to the direction the camera is facing. ie. z moves forward
@@ -43,33 +42,33 @@ public:
    void updateView();
 
    /// @brief: Returns const reference to camera position
-   const vec3& getPosition() const { return (m_position);}
+   const glm::vec3& getPosition() const { return (m_position);}
    /// @brief: Returns const reference to camera rotation
-   const vec3& getRotation() const { return (m_rotation);}
+   const glm::vec3& getRotation() const { return (m_rotation);}
+
    /// @brief: Returns const reference to camera direction vector
-   const vec3& getDirection() const { return (m_direction);}
+   const glm::vec3& getForward() const { return m_forward; }
+   const glm::vec3& getRight()   const { return m_right; }
+   const glm::vec3& getUp()      const { return m_up; }
 
    /// @brief: Get camera view matrix
-   const mat4x4& getViewMatrix() const {return (m_viewMatrix);};
+   const glm::mat4& getViewMatrix() const {return (m_viewMatrix);};
    /// @brief: Get camera projection matrix
-   const mat4x4& getProjectionMatrix() const {return (m_projectionMatrix);};
-   /// @brief: Get window linked to camera
-   const window& getWindow() const {return (m_window);};
+   const glm::mat4& getProjectionMatrix() const {return (m_projectionMatrix);};
 
 
-   /// @brief: Get far plane position of camera
-   float getFarPlane() const {return (m_far);};
-   /// @brief: Get near plane position of camera
-   float getNearPlane() const {return (m_near);};
    /// @brief: Set far plane position of camera, and update projection matrix
    /// @param far: far plane location as float 
-   void setFarPlane(float far) {m_far = far; m_projectionMatrix = matrix_project(m_fov,m_aspectRatio,m_near,m_far); };
+   void setFarPlane(float far) {m_far = far; m_projectionMatrix = glm::perspective(glm::radians(m_fov),m_aspectRatio,m_near,m_far); };
    /// @brief: Set near plane position of camera, and update projection matrix
    /// @param near: near plane location as float 
-   void setNearPlane(float near) {m_near = near; m_projectionMatrix = matrix_project(m_fov,m_aspectRatio,m_near,m_far); };
+   void setNearPlane(float near) {m_near = near; m_projectionMatrix = glm::perspective(glm::radians(m_fov),m_aspectRatio,m_near,m_far); };
    /// @brief: Set field of view of camera, and update projection matrix
    /// @param fov: field of view of the camera
-   void setFOV(float fov) {m_fov = fov; m_projectionMatrix = matrix_project(m_fov,m_aspectRatio,m_near,m_far); };
+   void setFOV(float fov) {m_fov = fov; m_projectionMatrix = glm::perspective(glm::radians(m_fov),m_aspectRatio,m_near,m_far); };
+   /// @brief: Set aspect ratio (only updates projection matrix if changed)
+   /// @param fov: field of view of the camera
+   void setAspectRatio(float ar) {if(m_aspectRatio != ar){ m_aspectRatio = ar; m_projectionMatrix = glm::perspective(glm::radians(m_fov),m_aspectRatio,m_near,m_far); }};
 
 private:
 
@@ -86,7 +85,7 @@ private:
    /// Transforms vertices from world space into camera (view) space, where the camera is treated as if it were at the origin
    /// looking down the negative z-axis. Conceptually, this moves the entire scene relative to the camera rather than moving
    /// the camera itself. Essential for positioning and orienting objects correctly from the camera's point of view.
-   mat4x4 m_viewMatrix;
+   glm::mat4 m_viewMatrix;
 
    /// @brief: Projection matrix used for both GPU and CPU rendering. Transforms vertices from camera (view) space into 
    /// clip space, defining how the 3D scene is projected onto a 2D screen. Encodes the field of view, aspect ratio, 
@@ -94,11 +93,12 @@ private:
    /// Conceptually, it determines the volume of space that will be visible on the screen and maps that volume into the canonical
    /// cube used by the rasterizer (-1 to 1 in x, y, z in normalized device coordinates). Essential for accurately projecting
    /// 3D geometry onto a 2D viewport and ensuring consistent rendering between CPU and GPU pipelines.
-   mat4x4 m_projectionMatrix;
+   glm::mat4 m_projectionMatrix;
 
-   window& m_window;
+   glm::vec3 m_position = glm::vec3(0,0,0);
+   glm::vec3 m_rotation = glm::vec3(0,0,0);
 
-   vec3 m_position = vec3(0,0,0);
-   vec3 m_rotation = vec3(0,0,0);
-   vec3 m_direction = vec3(0,0,-1);
+   glm::vec3 m_forward = glm::vec3(0,0,-1);
+   glm::vec3 m_right = glm::vec3(1,0,0);
+   glm::vec3 m_up = glm::vec3(0,1,0);
 };
