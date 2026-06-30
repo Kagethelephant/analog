@@ -1,12 +1,8 @@
 #include "window.hpp"
-#include "render/RAIIWrapper.hpp"
-#include "shaders/shader.hpp"
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <math.h>
-#include <iostream>
-#include <vector>
 
 
 window::window(int height){
@@ -25,8 +21,6 @@ window::window(int height){
 
    // FBO is the texture that we draw everything to. Lower resolution will give pixelated look
    aspectRatio = float(windowSize.x) / float(windowSize.y);
-   fboSize.y = height;
-   fboSize.x = int(fboSize.y * aspectRatio);
 
 
    //---------------------- SETUP GLFW ----------------------
@@ -34,7 +28,7 @@ window::window(int height){
    win = glfwCreateWindow(windowSize.x, windowSize.y, "The Game", NULL, NULL);
    glfwMakeContextCurrent(win);
    // Dont let the window height scale below FBO height
-   glfwSetWindowSizeLimits(win, GLFW_DONT_CARE, fboSize.y, GLFW_DONT_CARE, GLFW_DONT_CARE);
+   // glfwSetWindowSizeLimits(win, GLFW_DONT_CARE, fboSize.y, GLFW_DONT_CARE, GLFW_DONT_CARE);
    // This disables vsync
    glfwSwapInterval(0); 
    // Initialize GLAD (Loads functions from the GPU)
@@ -52,91 +46,8 @@ window::window(int height){
       self->aspectRatio  = float(w) / float(h);
    });
 
-   // // DEFINE THE VERTEX DATA QUAD
-   // // -----------------------------------------------------------------------------------
-   // quadVertices = {
-   //    -1.0f,  1.0f,  0.0f,  1.0f, // x, y, u, v
-   //    -1.0f, -1.0f,  0.0f,  0.0f,
-   //     1.0f, -1.0f,  1.0f,  0.0f,
-
-   //    -1.0f,  1.0f,  0.0f,  1.0f,
-   //     1.0f, -1.0f,  1.0f,  0.0f,
-   //     1.0f,  1.0f,  1.0f,  1.0f
-   // };
-
-   // // Create the VAO storing the vertice data for our full screen quad
-   // glGenVertexArrays(1, &UIvao);  
-   // glGenBuffers(1, &UIvbo);
-
-   // // Setup the VBO using the VAO
-   // GLScopedVAO tempVAO(UIvao);
-   // GLScopedVBO tempVBO(UIvbo);
-
-   // glBufferData(GL_ARRAY_BUFFER, quadVertices.size() * sizeof(GLfloat), quadVertices.data(), GL_STATIC_DRAW);
-   // glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), (void*)0);
-   // glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), (void*)(2*sizeof(GLfloat)));
-   // // This tells GL to use the vertex attributes defined above (it does not do this by default)
-   // glEnableVertexAttribArray(0);  
-   // glEnableVertexAttribArray(1);  
-   // // Shader program used to draw the quad defined above to the FBO
-   // shaderProgramUI = createShaderProgram("../src/shaders/ui_vertex.glsl", "../src/shaders/ui_fragment.glsl");
-
-
-   // // CREATE FBO
-   // // -----------------------------------------------------------------------------------
-   // glGenFramebuffers(1, &fbo);
-   // GLScopedFBO tempFBO(fbo);
-
-   // {
-   //    // Color attachment
-   //    glGenTextures(1, &colorTex);
-   //    GLScopedTexture2D tempTexture(colorTex);
-   //    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, fboSize.x, fboSize.y, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
-
-   //    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-   //    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-   //    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-   //    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-
-   //    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, colorTex, 0);
-   // }
-   // {
-   //    glGenTextures(1, &depth);
-   //    GLScopedTexture2D tempTexture(depth);
-   //    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT32F, fboSize.x, fboSize.y, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
-   //    // REQUIRED settings for depth textures
-   //    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-   //    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-   //    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-   //    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-   //    // Attach depth texture
-   //    glFramebufferTexture2D(GL_FRAMEBUFFER,GL_DEPTH_ATTACHMENT,GL_TEXTURE_2D,depth,0);
-   // }
-
-   // GLenum buffers[] = { GL_COLOR_ATTACHMENT0 };
-   // glDrawBuffers(1, buffers);
-
-   // if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-   //    std::cerr << "FixedFBO incomplete\n";
 }
 
-
-// void window::resize(){
-//    if (resizePending){
-//       // Recalculate FBO size (height fixed, width scales with aspect ratio)
-//       fboSize.x = int(fboSize.y * aspectRatio);
-//       {
-//          GLScopedTexture2D tempTexture(colorTex);
-//          glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, fboSize.x, fboSize.y, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
-//       }
-//       {
-//          GLScopedTexture2D tempDepth(depth);
-//          glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT32F, fboSize.x, fboSize.y, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
-//       }
-//       aspectRatio = (float)fboSize.x / (float)fboSize.y;
-//       resizePending = false;
-//    }
-// }
 
 bool window::checkKey(int key, KeyMode mode){
     int current = glfwGetKey(win, key);
@@ -185,14 +96,6 @@ void window::frameUpdate(){
 window::~window(){
    // Make sure the context is current before deleting GL objects
    if (win) glfwMakeContextCurrent(win);
-   // OpenGL cleanup
-   if (UIvbo) glDeleteBuffers(1, &UIvbo);
-   if (UIvao) glDeleteVertexArrays(1, &UIvao);
-   if (colorTex) glDeleteTextures(1, &colorTex);
-   if (depth) glDeleteTextures(1, &depth);
-   if (fbo) glDeleteFramebuffers(1, &fbo);
-   if (shaderProgramUI) glDeleteProgram(shaderProgramUI);
-   // Destroy window + context
    if (win) glfwDestroyWindow(win);
 
    glfwTerminate();

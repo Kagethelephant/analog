@@ -9,6 +9,7 @@
 #include "utils/data.hpp"
 #include "window.hpp"
 #include "shaders/shader.hpp"
+#include "render/surface.hpp"
 // Freetype Library
 #include <ft2build.h>
 #include FT_FREETYPE_H
@@ -23,7 +24,7 @@ public:
    /// @brief: Create new text engine
    /// @param win: Window to draw to (using FBO)
    /// @param fontFile: filepath to the font to use for this engine 
-   textRenderEngine(window& win, const char* fontFile);
+   textRenderEngine(const char* fontFile);
    ~textRenderEngine();
 
    /// @brief: Render text to the window attached to this text engine
@@ -31,12 +32,11 @@ public:
    /// @param x: X position on screen to render text
    /// @param y: Y position on screen to render text (top-left origin)
    /// @param col: Color to draw text (default: White)
-   void RenderText(std::string text, float x, float y, Color col = Color::White);
+   void RenderText(surface& surf,std::string text, float x, float y, Color col = Color::White);
 
 
 private:
 
-   window& m_window;
    FT_Library m_library;
 
    /// @brief: Stores the font face for the engine 

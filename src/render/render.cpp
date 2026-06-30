@@ -4,6 +4,8 @@
 #include "utils/data.hpp"
 #include "window/window.hpp"
 #include "world/object.hpp"
+#include "window/text.hpp"
+#include "iostream"
 // OpenGL
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
@@ -12,10 +14,9 @@
 
 
 
-gpuRenderEngine::gpuRenderEngine(camera& cam, const window& win) : m_camera{cam}, m_window{win}{
+gpuRenderEngine::gpuRenderEngine(camera& cam, const window& win) : m_camera{cam}, m_window{win} {
    m_shaderProgram3D = createShaderProgram("../src/shaders/3d_vertex.glsl", "../src/shaders/3d_fragment.glsl");
    shaderProgramUI = createShaderProgram("../src/shaders/ui_vertex.glsl", "../src/shaders/ui_fragment.glsl");
-
 
 
    // DEFINE THE VERTEX DATA QUAD
@@ -106,10 +107,33 @@ void gpuRenderEngine::bindObject(const object& obj){
 
 
 
+void gpuRenderEngine::draw(){
+
+   // Render the screen
+
+   // Bind the main window framebuffer to draw to the screen
+   glBindFramebuffer(GL_FRAMEBUFFER, 0);
+   // Set the viewport, shader program and VAO with RAII wrappers that will reset to previous
+   // OpenGL states at the end of the scope where they were bound
+   GLScopedViewport winViewPort(0, 0, m_window.getWindowSize().x, m_window.getWindowSize().y);
+   GLScopedProgram winProgram(shaderProgramUI);
+   GLScopedVAO tempVAO(m_quadVao);
+   // Select texture unit 0 and bind colorTex to GL_TEXTURE_2D on that unit
+   glActiveTexture(GL_TEXTURE0);
+   GLScopedTexture2D tempTexture(renderSurface.getSurface());
+
+   glUniform1i(glGetUniformLocation(shaderProgramUI, "screenTexture"), 0);
+   glDrawArrays(GL_TRIANGLES, 0, 6);
+}
+
+
+
+
 void gpuRenderEngine::render(){
 
-   renderSurface.size(800, m_window.getAspectRatio() * 800);
+   renderSurface.size(m_window.getAspectRatio() *800,  800);
    m_camera.setAspectRatio(m_window.getAspectRatio());
+
    {
 
       const glm::vec2& resolution = renderSurface.size();
@@ -175,21 +199,6 @@ void gpuRenderEngine::render(){
       }
    }
 
-   // Render the screen
-
-   // Bind the main window framebuffer to draw to the screen
-   glBindFramebuffer(GL_FRAMEBUFFER, 0);
-   // Set the viewport, shader program and VAO with RAII wrappers that will reset to previous
-   // OpenGL states at the end of the scope where they were bound
-   GLScopedViewport winViewPort(0, 0, m_window.getWindowSize().x, m_window.getWindowSize().y);
-   GLScopedProgram winProgram(shaderProgramUI);
-   GLScopedVAO tempVAO(m_quadVao);
-   // Select texture unit 0 and bind colorTex to GL_TEXTURE_2D on that unit
-   glActiveTexture(GL_TEXTURE0);
-   GLScopedTexture2D tempTexture(renderSurface.getSurface());
-
-   glUniform1i(glGetUniformLocation(shaderProgramUI, "screenTexture"), 0);
-   glDrawArrays(GL_TRIANGLES, 0, 6);
 
 }
 

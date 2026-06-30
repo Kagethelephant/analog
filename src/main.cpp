@@ -22,7 +22,6 @@ int main(int argc, char* argv[]){
    double posSpeed = 10.0f; // Position units / sec
    double rotSpeed = 3.0f;  // Radians / sec
 
-   textRenderEngine text(programWindow, "../resources/font/novem___.ttf");
 
 
    //------------------- CREATE MODELS, OBJECTS AND LIGHTS ------------------------
@@ -73,12 +72,13 @@ int main(int argc, char* argv[]){
       if (programWindow.checkKey(GLFW_KEY_DOWN)) {userCamera.rotate(-rotDelta, 0, 0);}
 
       // Update the resolution per fram in case the window changes size
-      const glm::vec2& resolution = programWindow.getFboSize();
+      const glm::vec2& resolution = gpuRend.getResolution();
 
       //------------------- RENDER PIPELINE ------------------------
       gpuRend.render();
-      text.RenderText("GPU", resolution.x/2.0f, 10,Color::Green);
-      text.RenderText("FPS: " + std::to_string(programWindow.getFPS()), 10, 10);
+      gpuRend.drawText("GPU", resolution.x/2.0f, 10,Color::Green);
+      gpuRend.drawText("FPS: " + std::to_string(programWindow.getFPS()), 10, 10);
+      gpuRend.draw();
 
       // Renders the FBO to the screen, checks for events, updates FPS, etc.
       programWindow.frameUpdate();

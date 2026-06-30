@@ -15,31 +15,6 @@ void surface::initialize(int w, int h) {
    m_width = w;
    m_height = h;
 
-   //---------------------- CREATE RENDER QUAD ----------------------
-   
-   // Quad will be scaled to FBO / window size. Everything will be drawn to this as a texture
-   m_quad = {
-      -1.0f,  1.0f,  0.0f,  1.0f, // x, y, u, v
-      -1.0f, -1.0f,  0.0f,  0.0f,
-       1.0f, -1.0f,  1.0f,  0.0f,
-
-      -1.0f,  1.0f,  0.0f,  1.0f,
-       1.0f, -1.0f,  1.0f,  0.0f,
-       1.0f,  1.0f,  1.0f,  1.0f
-   };
-
-   // Create the VAO storing the vertice data for our full screen quad
-   glGenVertexArrays(1, &m_quadVao);  
-   glGenBuffers(1, &m_quadVbo);
-
-   GLScopedVAO tempVAO(m_quadVao);
-   GLScopedVBO tempVBO(m_quadVbo);
-
-   glBufferData(GL_ARRAY_BUFFER, m_quad.size() * sizeof(GLfloat), m_quad.data(), GL_STATIC_DRAW);
-   glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), (void*)0);
-   glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), (void*)(2*sizeof(GLfloat)));
-   glEnableVertexAttribArray(0);  
-   glEnableVertexAttribArray(1);  
 
 
    //---------------------- CREATE RENDER FBO ----------------------

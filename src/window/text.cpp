@@ -12,7 +12,7 @@
 
 
 
-textRenderEngine::textRenderEngine(window& win, const char* fontPath) : m_window{win} {
+textRenderEngine::textRenderEngine( const char* fontPath) {
 
    if (FT_Init_FreeType(&m_library)) std::cout << "Could not init FreeType" << std::endl;
 
@@ -93,14 +93,15 @@ textRenderEngine::~textRenderEngine(){
 
 
 
-void textRenderEngine::RenderText(std::string text, float x, float y, Color col){
+void textRenderEngine::RenderText(surface& surf, std::string text, float x, float y, Color col){
 
    // Convert hex color to normalized RGB (0–1 range)
    glm::vec3 color = getColor(col);
 
-   const glm::vec2& resolution = m_window.getFboSize();
+   const glm::vec2& resolution = surf.size();
+
    // Bind window FBO to draw to and set viewport to match
-   GLScopedFBO tempFBO(m_window.getFbo());
+   GLScopedFBO tempFBO(surf.getFbo());
    GLScopedViewport tempViewPort(0, 0, resolution.x, resolution.y);
 
    GLScopedVAO tempVAO(m_vao);

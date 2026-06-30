@@ -5,6 +5,7 @@
 #include "world/camera.hpp"
 #include "shaders/shader.hpp"
 #include "surface.hpp"
+#include "window/text.hpp"
 // OpenGL
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
@@ -42,8 +43,19 @@ public:
       m_lightColors.push_back(newLight.color.z);
    }
 
+   surface& getActiveSurface(){return renderSurface;}
+
+   const glm::vec2 getResolution() {return renderSurface.size();};
+
    /// @brief: Render the scene with loaded objects and lights to the window FBO
    void render();
+
+   void drawText(std::string text, float x, float y, Color col = Color::White){
+
+      textRend.RenderText(renderSurface, text, x, y, col);
+   }
+
+   void draw();
 
 private:
    
@@ -85,7 +97,7 @@ private:
    GLuint m_quadVao;
    GLuint m_quadVbo;
 
-
+   textRenderEngine textRend = textRenderEngine("../resources/font/novem___.ttf");
    std::vector<float> m_quad;
 
 };
