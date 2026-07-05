@@ -9,13 +9,7 @@
 
 
 
-
-void surface::initialize(int w, int h) {
-
-   m_width = w;
-   m_height = h;
-
-
+void surface::initialize() {
 
    //---------------------- CREATE RENDER FBO ----------------------
 
@@ -24,8 +18,10 @@ void surface::initialize(int w, int h) {
    {
       // Color attachment
       glGenTextures(1, &m_colorTex);
+      std::cout << "FBO size: "
+         << m_size.x << " x " << m_size.y << "\n";
       GLScopedTexture2D tempTexture(m_colorTex);
-      glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, m_width, m_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
+      glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, m_size.x, m_size.y, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
       glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
       glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
       glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -36,7 +32,7 @@ void surface::initialize(int w, int h) {
    {
       glGenTextures(1, &m_depthTex);
       GLScopedTexture2D tempTexture(m_depthTex);
-      glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT32F, m_width, m_height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
+      glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT32F, m_size.x, m_size.y, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
       glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
       glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
       glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -48,26 +44,20 @@ void surface::initialize(int w, int h) {
    glDrawBuffers(1, buffers);
 
    if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) std::cout << "Surface FBO incomplete\n";
-
-
-   initialized = true;
 }
 
-void surface::size(int w, int h){
-   if (initialized){
 
-      m_width = w;
-      m_height = h;
-      {
-         GLScopedTexture2D tempTexture(m_colorTex);
-         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, m_width, m_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
-      }
-      {
-         GLScopedTexture2D tempDepth(m_depthTex);
-         glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT32F, m_width, m_height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
-      }
+void surface::m_resizeFbo(glm::ivec2 s){
+
+   m_size = s;
+   {
+      GLScopedTexture2D tempTexture(m_colorTex);
+      glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, m_size.x, m_size.y, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
    }
-   else initialize(w, h);
+   {
+      GLScopedTexture2D tempDepth(m_depthTex);
+      glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT32F, m_size.x, m_size.y, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
+   }
 }
 
 

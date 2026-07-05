@@ -1,4 +1,5 @@
 // OpenGL
+#include <cstddef>
 #include <glad/glad.h>
 #include <GL/gl.h>
 #include <GLFW/glfw3.h>
@@ -7,6 +8,7 @@
 #include "window/text.hpp"
 #include "window/window.hpp"
 #include "render/render.hpp"
+#include "render/render3D.hpp"
 // Standard Libraries
 #include <math.h>
 #include <string>
@@ -23,17 +25,20 @@ int main(int argc, char* argv[]){
    double rotSpeed = 3.0f;  // Radians / sec
 
 
+   gpuRenderEngine gpuRend(programWindow);
+   render3D rend(userCamera, programWindow);
+
 
    //------------------- CREATE MODELS, OBJECTS AND LIGHTS ------------------------
    // Models load geometry once and can be used by many objects
-   model arcanineModel("../resources/objects/Arcanine/Arcanine.obj");
-   model cubeMod("../resources/objects/cube.obj");
+   std::size_t arcanineModel = rend.loadModel("../resources/objects/Arcanine/Arcanine.obj");
+   std::size_t cubeMod = rend.loadModel("../resources/objects/cube.obj");
 
-   object arcanineObj(arcanineModel);
+   object3D arcanineObj = rend.createObject(arcanineModel);
    arcanineObj.move(-10,0,-10);
    arcanineObj.scale(10,10,10);
 
-   object cube(cubeMod);
+   object3D cube = rend.createObject(cubeMod);
    cube.move(0,0,-2);
    cube.scale(1,1,1);
    cube.color(Color::Yellow);
@@ -44,12 +49,8 @@ int main(int argc, char* argv[]){
 
    //------------------- BIND OBJECTS AND LIGHTS TO RENDERERS ------------------------
    // Pass same camera, objects, and lights to both renderers to mirror screen output between the two
-   gpuRenderEngine gpuRend(userCamera, programWindow);
-   gpuRend.bindObject(arcanineObj);
-   gpuRend.bindObject(cube);
-
-   gpuRend.addLight(redLight);
-   gpuRend.addLight(blueLight);
+   rend.addLight(redLight);
+   rend.addLight(blueLight);
 
 
    //------------------- PROGRAM LOOP ------------------------
@@ -72,13 +73,13 @@ int main(int argc, char* argv[]){
       if (programWindow.checkKey(GLFW_KEY_DOWN)) {userCamera.rotate(-rotDelta, 0, 0);}
 
       // Update the resolution per fram in case the window changes size
-      const glm::vec2& resolution = gpuRend.getResolution();
+      // const glm::vec2& resolution = gpuRend.getResolution();
 
       //------------------- RENDER PIPELINE ------------------------
-      gpuRend.render();
-      gpuRend.drawText("GPU", resolution.x/2.0f, 10,Color::Green);
-      gpuRend.drawText("FPS: " + std::to_string(programWindow.getFPS()), 10, 10);
-      gpuRend.draw();
+      rend.render();
+      // gpuRend.drawText("GPU", resolution.x/2.0f, 10,Color::Green);
+      // gpuRend.drawText("FPS: " + std::to_string(programWindow.getFPS()), 10, 10);
+      gpuRend.draw(rend.getSurface());
 
       // Renders the FBO to the screen, checks for events, updates FPS, etc.
       programWindow.frameUpdate();

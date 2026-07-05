@@ -25,12 +25,14 @@ add_subdirectory(lib/freeType)
 set(SOURCE_FILES
    lib/glad/src/glad.c
    src/main.cpp
+   src/world/model.cpp
    src/world/object.cpp
    src/world/camera.cpp
    src/window/window.cpp
    src/window/text.cpp
    src/render/render.cpp
    src/render/surface.cpp
+   src/render/render3D.cpp
    src/shaders/shader.cpp
    src/utils/data.cpp
 )

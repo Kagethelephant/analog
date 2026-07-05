@@ -6,8 +6,14 @@
 // Standard Libraries
 #include <unordered_map>
 
+class IResizeTarget
+{
+public:
+    virtual glm::ivec2 size() const = 0;
+    virtual ~IResizeTarget() = default;
+};
 
-class window {
+class window : public IResizeTarget {
 
 public:
 
@@ -25,6 +31,7 @@ public:
    float getAspectRatio() const { return aspectRatio;}
    const glm::vec2& getWindowSize() const { return windowSize;}
 
+   glm::ivec2 size() const override{return windowSize;}
 
    GLFWwindow* getHandle() {return win;}
 
