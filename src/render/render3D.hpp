@@ -2,16 +2,15 @@
 // Program headers
 #include "window/window.hpp"
 #include "world/object.hpp"
+#include "world/model.hpp"
 #include "world/camera.hpp"
 #include "shaders/shader.hpp"
 #include "surface.hpp"
-#include "window/text.hpp"
 // OpenGL
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 // Standard Libraries
 #include <vector>
-#include <iostream>
 
 
 
@@ -19,6 +18,10 @@
 // Constant max number of lights (this needs to match 3d frag shader constant MAX_LIGHTS)
 constexpr unsigned int MAX_LIGHTS = 32;
 
+struct model3D{
+   model3D(std::size_t i) : index(i){};
+   std::size_t index;
+};
 
 class object3D;
 
@@ -30,13 +33,13 @@ public:
 
    /// @brief: Create new GPU rendering engine
    /// @param cam: Camera to reference for view matrix and window size
-   render3D(camera& cam, const window& win, int height = 400);
+   render3D(surface& surf);
 
    /// @brief: Load object data to GPU and memory to render in loop with "render"
    /// @param obj: Object to load
-   std::size_t loadModel(const std::string& filename, bool cwWinding = false);
+   model3D loadModel(const std::string& filename, bool cwWinding = false);
 
-   object3D createObject(std::size_t m);
+   object3D createObject(model3D m);
 
    /// @brief: Load lights into engine to use for rendering
    /// @param newLight: Light to be loaded
@@ -54,7 +57,7 @@ public:
    const glm::vec2 getResolution() {return m_renderSurface.size();};
 
    /// @brief: Render the scene with loaded objects and lights to the window FBO
-   void render();
+   void render(camera& cam);
 
    std::vector<object> objects;
 
@@ -71,9 +74,7 @@ private:
    std::vector<float> m_lightPositions;
    std::vector<float> m_lightColors;
 
-   camera& m_camera;
-
-   surface m_renderSurface;
+   surface& m_renderSurface;
 };
 
 
@@ -112,4 +113,6 @@ private:
    render3D* parent;
    std::size_t index;
 };
+
+
 

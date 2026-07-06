@@ -5,11 +5,9 @@
 #include "utils/data.hpp"
 #include "window/window.hpp"
 #include "world/object.hpp"
-#include "window/text.hpp"
-#include "iostream"
+#include "world/model.hpp"
+#include <iostream>
 // OpenGL
-#include <cstddef>
-#include <cstdint>
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 // Std Libraries
@@ -17,31 +15,30 @@
 
 
 
-render3D::render3D(camera& cam, const window& win, int height) : 
-   m_camera{cam},
-   m_renderSurface(win,height,surface::resizeMode::fixedHeight){
+render3D::render3D(surface& surf) : m_renderSurface(surf){
 
    m_shaderProgram3D = createShaderProgram("../src/shaders/3d_vertex.glsl", "../src/shaders/3d_fragment.glsl");
 };
 
-std::size_t render3D::loadModel(const std::string& filename, bool cwWinding){
+model3D render3D::loadModel(const std::string& filename, bool cwWinding){
    m_models.emplace_back(filename,cwWinding);
-   return m_models.size() - 1;
+   return model3D(m_models.size() - 1);
 }
 
-object3D render3D::createObject(std::size_t m){
-   objects.emplace_back(m);
+object3D render3D::createObject(model3D m){
+   objects.emplace_back(m.index);
+   std::cout << "Model Created" << std::endl;
    return object3D (this,objects.size() - 1);
 
 }
 
 
 
-void render3D::render(){
+void render3D::render(camera& cam){
 
    m_renderSurface.resize();
    glm::ivec2 s(m_renderSurface.getAspect() *800,  800);
-   m_camera.setAspectRatio(m_renderSurface.getAspect());
+   cam.setAspectRatio(m_renderSurface.getAspect());
 
    const glm::vec2& resolution = m_renderSurface.size();
    // Set OpenGL states that are agnostic of object or submesh 
@@ -77,8 +74,8 @@ void render3D::render(){
 
 
       // update the uniforms per fram to account for camera, object or light moves
-      glUniformMatrix4fv(glGetUniformLocation(m_shaderProgram3D, "view"),1,GL_FALSE,&m_camera.getViewMatrix()[0][0]);
-      glUniformMatrix4fv(glGetUniformLocation(m_shaderProgram3D, "project"),1,GL_FALSE,&m_camera.getProjectionMatrix()[0][0]);
+      glUniformMatrix4fv(glGetUniformLocation(m_shaderProgram3D, "view"),1,GL_FALSE,&cam.getViewMatrix()[0][0]);
+      glUniformMatrix4fv(glGetUniformLocation(m_shaderProgram3D, "project"),1,GL_FALSE,&cam.getProjectionMatrix()[0][0]);
 
       glUniform1i(glGetUniformLocation(m_shaderProgram3D, "lightCount"),lightCount);
       glUniform3fv(glGetUniformLocation(m_shaderProgram3D, "lightPos"),lightCount,&m_lightPositions[0]);

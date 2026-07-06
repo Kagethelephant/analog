@@ -33,7 +33,6 @@ public:
 
    glm::ivec2 size() const override{return windowSize;}
 
-   GLFWwindow* getHandle() {return win;}
 
    bool shouldClose() const {return glfwWindowShouldClose(win);}
    double getFrameElapsedTime() const {return frameTime;}

@@ -24,24 +24,31 @@ int main(int argc, char* argv[]){
    double posSpeed = 10.0f; // Position units / sec
    double rotSpeed = 3.0f;  // Radians / sec
 
+   surface renderSurface(programWindow,400,surface::resizeMode::fixedHeight);
 
    gpuRenderEngine gpuRend(programWindow);
-   render3D rend(userCamera, programWindow);
+   render3D rend(renderSurface);
+   textRenderEngine textRend("../resources/font/novem___.ttf");
 
 
    //------------------- CREATE MODELS, OBJECTS AND LIGHTS ------------------------
    // Models load geometry once and can be used by many objects
-   std::size_t arcanineModel = rend.loadModel("../resources/objects/Arcanine/Arcanine.obj");
-   std::size_t cubeMod = rend.loadModel("../resources/objects/cube.obj");
+   model3D arcanineModel = rend.loadModel("../resources/objects/Arcanine/Arcanine.obj");
+   model3D cubeMod = rend.loadModel("../resources/objects/cube.obj");
 
    object3D arcanineObj = rend.createObject(arcanineModel);
-   arcanineObj.move(-10,0,-10);
+   arcanineObj.move(-4,0,-10);
    arcanineObj.scale(10,10,10);
 
+
    object3D cube = rend.createObject(cubeMod);
-   cube.move(0,0,-2);
-   cube.scale(1,1,1);
+   cube.move(2,0,-8);
    cube.color(Color::Yellow);
+
+   object3D cube2 = rend.createObject(cubeMod);
+   cube2.move(-1,0,-8);
+   cube2.scale(.5,.5,.5);
+   cube2.color(Color::Blue);
 
    // Light position and RGB color (0–1 range)
    light redLight(glm::vec3(15,5,5),glm::vec3(0.6,0.3,0.3));
@@ -73,12 +80,13 @@ int main(int argc, char* argv[]){
       if (programWindow.checkKey(GLFW_KEY_DOWN)) {userCamera.rotate(-rotDelta, 0, 0);}
 
       // Update the resolution per fram in case the window changes size
-      // const glm::vec2& resolution = gpuRend.getResolution();
+      const glm::vec2& resolution = renderSurface.size();
 
       //------------------- RENDER PIPELINE ------------------------
-      rend.render();
-      // gpuRend.drawText("GPU", resolution.x/2.0f, 10,Color::Green);
-      // gpuRend.drawText("FPS: " + std::to_string(programWindow.getFPS()), 10, 10);
+      rend.render(userCamera);
+
+      textRend.RenderText(renderSurface,"GPU", resolution.x/2.0f, 10,Color::Green);
+      textRend.RenderText(renderSurface,"FPS: " + std::to_string(programWindow.getFPS()), 10, 10);
       gpuRend.draw(rend.getSurface());
 
       // Renders the FBO to the screen, checks for events, updates FPS, etc.
@@ -86,7 +94,6 @@ int main(int argc, char* argv[]){
       userCamera.updateView();
    }
 
-   // Called after scope so all GLFW object destructors can be called
    return 0;
 }
 

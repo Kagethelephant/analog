@@ -2,7 +2,6 @@
 #pragma once
 // Project Libraries
 #include "glm/ext/matrix_clip_space.hpp"
-#include "window/window.hpp"
 
 #include <glm/glm.hpp>
 

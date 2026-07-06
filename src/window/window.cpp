@@ -89,9 +89,8 @@ void window::frameUpdate(){
 
    glfwSwapBuffers(win);
    glfwPollEvents();
-
-   // resize();
 }
+
 
 window::~window(){
    // Make sure the context is current before deleting GL objects
