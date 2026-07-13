@@ -4,13 +4,12 @@
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
 // Standard Libraries
-#include <vector>
 #include "window/window.hpp"
 // Project Headers
 
 
 
-class surface : public IResizeTarget {
+class surface : public frameBuffer {
 public:
 
    enum class resizeMode{
@@ -20,8 +19,8 @@ public:
 
    // Constructors for different surface resize types
    surface(int w, int h){ initialize(); fixed(w,h); }
-   surface(const IResizeTarget& w){ initialize(); match(w); }
-   surface(const IResizeTarget& w, int s, resizeMode m){ 
+   surface(const frameBuffer& w){ initialize(); match(w); }
+   surface(const frameBuffer& w, int s, resizeMode m){ 
       initialize(); 
       if(m == resizeMode::fixedWidth) {
          matchFixedWidth(w,s);
@@ -41,9 +40,9 @@ public:
 
    // Functions for changing the resize mode
    void fixed(int w, int h){setResizeFunction([=](){return glm::ivec2{w, h};}); resize();}
-   void match(const IResizeTarget& surf){setResizeFunction([&surf](){return surf.size();}); resize();}
+   void match(const frameBuffer& surf){setResizeFunction([&surf](){return surf.size();}); resize();}
 
-   void matchFixedHeight(const IResizeTarget& surf, int h){
+   void matchFixedHeight(const frameBuffer& surf, int h){
       
       setResizeFunction([&surf, h](){
          auto s = surf.size(); 
@@ -52,7 +51,7 @@ public:
       }); 
       resize();
    }
-   void matchFixedWidth(const IResizeTarget& surf, int w){
+   void matchFixedWidth(const frameBuffer& surf, int w){
       setResizeFunction([&surf, w](){
          auto s = surf.size();
          float aspect = static_cast<float>(s.x) / s.y;
@@ -63,14 +62,15 @@ public:
 
    using ResizeFunction = std::function<glm::ivec2()>;
    void setResizeFunction(ResizeFunction fn){ m_resizeCallback = std::move(fn); }
-   void resize(){ if (!m_resizeCallback) return; m_resizeFbo(m_resizeCallback()); }
+   void resize(){ if (!m_resizeCallback) return; resizeFbo(m_resizeCallback()); }
 
+   GLuint framebuffer() const override {return m_fbo;}
 private:
 
    ResizeFunction m_resizeCallback;
 
    void initialize();
-   void m_resizeFbo(glm::ivec2 s);
+   void resizeFbo(glm::ivec2 s);
 
    glm::ivec2 m_size = glm::ivec2(2,2);
 

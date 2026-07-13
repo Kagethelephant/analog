@@ -1,12 +1,12 @@
 
 #include "model.hpp"
 #include "render/RAIIWrapper.hpp"
+#include "utils/debug.hpp"
 // OpenGL
 #include <glad/glad.h>
 #include <GL/gl.h>
 #include <GLFW/glfw3.h>
 // Standard Libraries
-#include <iostream>
 #include <math.h>
 #include <fstream>
 #include <sstream>
@@ -18,6 +18,7 @@
 #include <stb_image.h>
 
 
+#include <iostream>
 
 
 //---------------------- LOAD MODEL FROM OBJ FILE ----------------------
@@ -26,20 +27,11 @@ model::model(const std::string& filename, bool cwWinding) {
 
    std::ifstream obj(filename);
    if (!obj) { throw std::runtime_error("Failed to open OBJ file");}
-
-   // dir is used to find other files within the same directory
    std::string dir = getDirectory(filename);
 
    // Raw OBJ attribute streams
    std::vector<glm::vec3> objPositions;
    std::vector<glm::vec2> objTexcoords;
-
-
-
-   /// @brief: Contains all sub meshes that make up the model
-   std::vector<subMesh> m_subMeshes;
-   /// @brief: Tightly packed vertex data for GPU rendering
-   std::vector<float> m_vertices;
 
 
    // hash table mapping a combination of position and texture indexes to a vertex object 
@@ -91,7 +83,6 @@ model::model(const std::string& filename, bool cwWinding) {
       // ---------- FACE ----------
       else if (type == "f") {
          // ---------- COLLECT INDICES
-
          // Create an initial submesh for the current submesh. This ensures that if there is no
          // material (untextured model) than we can still create a submesh
          if(m_subMeshes.size() == 0){
@@ -109,7 +100,6 @@ model::model(const std::string& filename, bool cwWinding) {
          // Temporary storage for this polygons position and texture indices
          std::vector<int> vIdx;
          std::vector<int> tIdx;
-
 
          std::string vert;
          while (stream >> vert) {
@@ -134,9 +124,7 @@ model::model(const std::string& filename, bool cwWinding) {
          // Need at least a triangle to generate face/polygon
          if (vIdx.size() < 3) continue;
 
-
          // ---------- FAN TRIANGULATION
-         
          for (int i = 1; i < vIdx.size()-1; ++i) {
             // Start with the first triangle (should be {0,1,2} then {0,2,3} for triangle fan)
             int tri[3] = {0, i, i+1};
@@ -158,22 +146,15 @@ model::model(const std::string& filename, bool cwWinding) {
                   int correctedKeyV = (key.v < 0) ? objPositions.size() + key.v + 1 : key.v;
                   int correctedKeyT = (key.t < 0) ? objTexcoords.size() + key.t + 1 : key.t;
 
-                  uint32_t newIndex = static_cast<uint32_t>(m_vertices.size()/5);
+                  uint32_t newIndex = static_cast<uint32_t>(m_vertices.size());
 
                   // vertex has not been created, so create it and add the position and texture data if it exists
-                  m_vertices.push_back(objPositions[correctedKeyV].x);
-                  m_vertices.push_back(objPositions[correctedKeyV].y);
-                  m_vertices.push_back(objPositions[correctedKeyV].z);
 
-                  if (currentMesh.textured){
-                     m_vertices.push_back(objTexcoords[correctedKeyT].x);
-                     m_vertices.push_back(objTexcoords[correctedKeyT].y);
-                  }
-                  else {
-                     m_vertices.push_back(0.0f);
-                     m_vertices.push_back(0.0f);
-                  }
-
+                  // if (currentMesh.textured){
+                  m_vertices.emplace_back(vertex{
+                     objPositions[correctedKeyV],
+                     currentMesh.textured ? objTexcoords[correctedKeyT] : glm::vec2(0.0f)
+                  });
                   // Add new vertex to verices vector array and map the location to the 
                   // current submesh and the vertexCache hashtable for use on other faces if applicable
                   vertexCache[key] = newIndex;
@@ -187,22 +168,22 @@ model::model(const std::string& filename, bool cwWinding) {
 
 
 
-   glGenBuffers(1, &vbo);
-   glGenVertexArrays(1, &vao);  
-   GLScopedVAO tempVAO(vao);
-   GLScopedVBO tempVBO(vbo);
+   glGenBuffers(1, &m_vbo);
+   glGenVertexArrays(1, &m_vao);  
+   GLScopedVAO tempVAO(m_vao);
+   GLScopedVBO tempVBO(m_vbo);
 
    // Need raw vertices from model because the VAO expects contigous memory
-   glBufferData(GL_ARRAY_BUFFER, m_vertices.size() * sizeof(GLfloat), m_vertices.data(), GL_STATIC_DRAW);
+   glBufferData(GL_ARRAY_BUFFER,m_vertices.size() * sizeof(vertex),m_vertices.data(),GL_STATIC_DRAW);
    // positions at location 0
-   glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+   glVertexAttribPointer(0,3,GL_FLOAT,GL_FALSE,sizeof(vertex),(void*)offsetof(vertex, position));
    glEnableVertexAttribArray(0);
    // UVs at location 1
-   glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+   glVertexAttribPointer(1,2,GL_FLOAT,GL_FALSE,sizeof(vertex),(void*)offsetof(vertex, uv));
    glEnableVertexAttribArray(1);
 
 
-   for (const auto& mesh : m_subMeshes) {
+   for (const subMesh& mesh : m_subMeshes) {
       gpuSubMesh gpuSub;
 
       gpuSub.textured = mesh.textured;
@@ -231,6 +212,8 @@ model::model(const std::string& filename, bool cwWinding) {
 
       subMeshes.push_back(gpuSub);
    }
+
+   m_body = generateMassProperties(glm::vec3(1.0f));
 }
 
 
@@ -301,3 +284,118 @@ void model::loadMTL(const std::string& filepath) {
       }
    }
 }
+
+rigidBody model::generateMassProperties(const glm::vec3& scale) const {
+
+   rigidBody body;
+   float totalVolume = 0;
+   glm::vec3 weightedCentroid(0.0f);
+
+   float density = 1.0f;
+
+   // float mass(0.0f);
+
+   float totalxx(0.0f);
+   float totalyy(0.0f);
+   float totalzz(0.0f);
+   float totalxy(0.0f);
+   float totalxz(0.0f);
+   float totalyz(0.0f);
+
+   for(const subMesh& mesh: m_subMeshes) {
+      for(int i = 0; i < mesh.indices.size()/3; i++ ){
+
+         glm::vec3 A = m_vertices[mesh.indices[i*3]].position * scale;
+         glm::vec3 B = m_vertices[mesh.indices[i*3 + 1]].position * scale;
+         glm::vec3 C = m_vertices[mesh.indices[i*3 + 2]].position * scale;
+
+         float volume = glm::dot(glm::cross(A, B), C) / 6.0f;
+         glm::vec3 centroid = (A + B + C) * 0.25f;
+
+         totalVolume += volume;
+         weightedCentroid += centroid * volume;
+
+
+         // Closed-form second moment integrals for a tetrahedron.
+         totalxx += (volume / 10.0f) * (A.x*A.x + B.x*B.x + C.x*C.x + A.x*B.x + A.x*C.x + B.x*C.x);
+         totalyy += (volume / 10.0f) * (A.y*A.y + B.y*B.y + C.y*C.y + A.y*B.y + A.y*C.y + B.y*C.y);
+         totalzz += (volume / 10.0f) * (A.z*A.z + B.z*B.z + C.z*C.z + A.z*B.z + A.z*C.z + B.z*C.z);
+
+         totalxy += (volume / 20.0f) * (2*A.x*A.y + 2*B.x*B.y + 2*C.x*C.y +
+            A.x*B.y + B.x*A.y + 
+            A.x*C.y + C.x*A.y + 
+            B.x*C.y + C.x*B.y);
+
+         totalxz += (volume / 20.0f) * (2*A.x*A.z + 2*B.x*B.z + 2*C.x*C.z +
+            A.x*B.z + B.x*A.z + 
+            A.x*C.z + C.x*A.z + 
+            B.x*C.z + C.x*B.z);
+
+         totalyz += (volume / 20.0f) * (2*A.y*A.z + 2*B.y*B.z + 2*C.y*C.z +
+            A.y*B.z + B.y*A.z + 
+            A.y*C.z + C.y*A.z + 
+            B.y*C.z + C.y*B.z);
+      }
+   }
+
+   // Construct inertia tensor
+   // Calculates inertia with rotation about model origin
+   glm::mat3 originInertia(0.0f);
+
+   originInertia[0][0] = totalyy + totalzz;
+   originInertia[1][0] = -totalxy;
+   originInertia[2][0] = -totalxz;
+
+   originInertia[0][1] = -totalxy;
+   originInertia[1][1] = totalxx + totalzz;
+   originInertia[2][1] = -totalyz;
+
+   originInertia[0][2] = -totalxz;
+   originInertia[1][2] = -totalyz;
+   originInertia[2][2] = totalxx + totalyy;
+
+   originInertia *= density;
+   body.mass = totalVolume * density;
+   print(body.mass);
+
+   // Parallel axis theorem
+   if (std::abs(totalVolume) < 1e-6f)
+    throw std::runtime_error("Mesh has zero volume.");
+   // Distance from origin to center of mass squared 
+   body.com = weightedCentroid / totalVolume;
+   glm::vec3 d = body.com;
+   float d2 = glm::dot(d,d);
+
+
+   // Calculate outer product
+   glm::mat3 outer(0.0f);
+
+   outer[0][0] = d.x * d.x;
+   outer[1][0] = d.x * d.y;
+   outer[2][0] = d.x * d.z;
+
+   outer[0][1] = d.y * d.x;
+   outer[1][1] = d.y * d.y;
+   outer[2][1] = d.y * d.z;
+
+   outer[0][2] = d.z * d.x;
+   outer[1][2] = d.z * d.y;
+   outer[2][2] = d.z * d.z;
+
+
+   // glm::mat3 term = d2 * glm::mat3(1.0f);
+
+   // glm::mat3 shift = term - outer;
+
+   // shift *= mass;
+
+   body.inertia = originInertia - ((d2 * glm::mat3(1.0f) - outer) * body.mass);
+
+
+
+   // glm::mat3 inertiaCOM = OriginInertia - shift;
+   
+   return body;
+}
+
+

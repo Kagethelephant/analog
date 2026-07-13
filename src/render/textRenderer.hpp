@@ -7,7 +7,6 @@
 #include <map>
 // Program Headers
 #include "utils/data.hpp"
-#include "window.hpp"
 #include "shaders/shader.hpp"
 #include "render/surface.hpp"
 // Freetype Library

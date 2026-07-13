@@ -1,7 +1,5 @@
 
 #pragma once
-// Project Libraries
-#include "utils/data.hpp"
 // Standard Libraries
 #include <vector>
 #include <unordered_map>
@@ -11,9 +9,9 @@
 #include <GLFW/glfw3.h>
 
 #include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
-#include <glm/gtc/quaternion.hpp>
+// #include <glm/gtc/matrix_transform.hpp>
+// #include <glm/gtc/type_ptr.hpp>
+// #include <glm/gtc/quaternion.hpp>
 
 
 
@@ -22,6 +20,17 @@ struct gpuSubMesh{
    GLuint tex;
    GLuint ebo;
    std::size_t indiceCount;
+};
+
+struct vertex{
+   glm::vec3 position;
+   glm::vec2 uv;
+};
+
+struct rigidBody {
+   float mass = 0.0f;
+   glm::vec3 com = glm::vec3(0.0f,0.0f,0.0f);
+   glm::mat3 inertia;
 };
 
 //---------------------- MODEL ----------------------
@@ -53,14 +62,19 @@ public:
    };
 
 
-
    /// @brief: Get submesh vector array
    const std::vector<gpuSubMesh>& getSubMeshes() const { return subMeshes; }
-   const GLuint& getVao() const { return vao; }
-   const GLuint& getVbo() const { return vbo; }
+   const GLuint& getVao() const { return m_vao; }
+   const GLuint& getVbo() const { return m_vbo; }
 
+   const rigidBody& getMassProperties() const {return m_body;}
+
+
+   rigidBody generateMassProperties(const glm::vec3& scale) const;
 
 private:
+
+   rigidBody m_body;
 
    /// @brief: Contains all sub meshes that make up the model
    std::vector<gpuSubMesh> subMeshes;
@@ -69,8 +83,8 @@ private:
    std::unordered_map<std::string, texture> m_textureMap;
 
    // Grab refernce to object on create so we can get things like object color during rendering
-   GLuint vao;
-   GLuint vbo;
+   GLuint m_vao;
+   GLuint m_vbo;
 
    /// @brief: Represents a unique combination of a vertex position index (v) and texture index (t)
    /// for use as a key in unordered_map. operator== is used to compare keys that hash to the same bucket.
@@ -100,6 +114,10 @@ private:
       }
    };
 
+   /// @brief: Contains all sub meshes that make up the model
+   std::vector<subMesh> m_subMeshes;
+   /// @brief: Tightly packed vertex data for GPU rendering
+   std::vector<vertex> m_vertices;
 
    /// @brief: load image data into a texture object from file
    /// @param filename: filepath of texture

@@ -1,4 +1,4 @@
-#include "render3D.hpp"
+#include "meshRenderer.hpp"
 // Program headers
 #include "RAIIWrapper.hpp"
 #include "glm/fwd.hpp"
@@ -6,6 +6,7 @@
 #include "window/window.hpp"
 #include "world/object.hpp"
 #include "world/model.hpp"
+#include "world/scene3D.hpp"
 #include <iostream>
 // OpenGL
 #include <glad/glad.h>
@@ -15,34 +16,27 @@
 
 
 
-render3D::render3D(surface& surf) : m_renderSurface(surf){
-
+meshRenderer::meshRenderer() {
    m_shaderProgram3D = createShaderProgram("../src/shaders/3d_vertex.glsl", "../src/shaders/3d_fragment.glsl");
 };
 
-model3D render3D::loadModel(const std::string& filename, bool cwWinding){
-   m_models.emplace_back(filename,cwWinding);
-   return model3D(m_models.size() - 1);
-}
 
-object3D render3D::createObject(model3D m){
-   objects.emplace_back(m.index);
-   std::cout << "Model Created" << std::endl;
-   return object3D (this,objects.size() - 1);
+void meshRenderer::render(surface& m_renderSurface, scene3D& scene){
 
-}
+   camera& cam = scene.getActiveCamera();
+   std::vector<model>& m_models = scene.getModels();
+   std::vector<object>& objects = scene.getObjects();
+   std::vector<light>& m_lights = scene.getLights();
 
-
-
-void render3D::render(camera& cam){
 
    m_renderSurface.resize();
    glm::ivec2 s(m_renderSurface.getAspect() *800,  800);
    cam.setAspectRatio(m_renderSurface.getAspect());
 
+
    const glm::vec2& resolution = m_renderSurface.size();
    // Set OpenGL states that are agnostic of object or submesh 
-   GLScopedFBO tempFBO(m_renderSurface.getFbo());                           // Window FBO to draw to
+   GLScopedFBO tempFBO(m_renderSurface.getFbo());                    // Window FBO to draw to
    GLScopedViewport tempViewPort(0, 0, resolution.x, resolution.y);  // Viewport matching FBO size
    GLScopedProgram tempProgram(m_shaderProgram3D);                   // 3D rendering shader program
    GLScopedCapability tempCullEnable(GL_CULL_FACE,true);             // Backface culling enable
@@ -54,13 +48,24 @@ void render3D::render(camera& cam){
    glm::vec4 bgColor = getColor(Color::Black);
    glClearColor(bgColor[0],bgColor[1],bgColor[2],bgColor[3]);
    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+ 
+   // DOES NOT HAVE RAII WRAPPER ! ! ! ! ! ! ! ! !
+   GLuint lightSSBO;
+   glGenBuffers(1, &lightSSBO);
+
+   glBindBuffer(GL_SHADER_STORAGE_BUFFER, lightSSBO);
+   glBufferData(GL_SHADER_STORAGE_BUFFER,m_lights.size() * sizeof(light),m_lights.data(),GL_DYNAMIC_DRAW);
+   glBindBufferBase(GL_SHADER_STORAGE_BUFFER,0,lightSSBO);
+
+
+   // DOES NOT HAVE RAII WRAPPER ! ! ! ! ! ! ! ! !
 
    // Tell GPU how many lights we have so it does not have to itterate to MAX_LIGHTS each fragment
-   int lightCount = std::min(MAX_LIGHTS, (unsigned int)m_lightPositions.size() / 3);
+   // int lightCount = std::min(MAX_LIGHTS, (unsigned int)m_lightPositions.size() / 3);
 
    for (const object& obj : objects){
 
-      const model& mod = m_models[obj.getModel()];
+      const model& mod = obj.getModel();
 
       const GLuint& vao = mod.getVao();
       const GLuint& vbo = mod.getVbo();
@@ -76,13 +81,9 @@ void render3D::render(camera& cam){
       // update the uniforms per fram to account for camera, object or light moves
       glUniformMatrix4fv(glGetUniformLocation(m_shaderProgram3D, "view"),1,GL_FALSE,&cam.getViewMatrix()[0][0]);
       glUniformMatrix4fv(glGetUniformLocation(m_shaderProgram3D, "project"),1,GL_FALSE,&cam.getProjectionMatrix()[0][0]);
-
-      glUniform1i(glGetUniformLocation(m_shaderProgram3D, "lightCount"),lightCount);
-      glUniform3fv(glGetUniformLocation(m_shaderProgram3D, "lightPos"),lightCount,&m_lightPositions[0]);
-      glUniform3fv(glGetUniformLocation(m_shaderProgram3D, "lightCol"),lightCount,&m_lightColors[0]);
+      glUniformMatrix4fv(glGetUniformLocation(m_shaderProgram3D, "model"),1,GL_FALSE,&obj.getModelMatrix()[0][0]);
 
       glUniform3fv(glGetUniformLocation(m_shaderProgram3D, "objCol"),1,&color[0]);
-      glUniformMatrix4fv(glGetUniformLocation(m_shaderProgram3D, "model"),1,GL_FALSE,&obj.getModelMatrix()[0][0]);
 
 
       for (const gpuSubMesh& sub : mod.getSubMeshes()) {

@@ -1,9 +1,9 @@
-#include "render.hpp"
+#include "renderSystem.hpp"
 // Program headers
 #include "RAIIWrapper.hpp"
 #include "glm/fwd.hpp"
 #include "window/window.hpp"
-#include "window/text.hpp"
+#include "render/textRenderer.hpp"
 // OpenGL
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
@@ -12,10 +12,9 @@
 
 
 
-gpuRenderEngine::gpuRenderEngine( const window& win) : m_window{win}{ 
+renderSystem::renderSystem( const window& win) : m_window{win}{ 
 
-   shaderProgramUI = createShaderProgram("../src/shaders/ui_vertex.glsl", "../src/shaders/ui_fragment.glsl");
-
+   m_shaderProgramUI = createShaderProgram("../src/shaders/ui_vertex.glsl", "../src/shaders/ui_fragment.glsl");
 
    // DEFINE THE VERTEX DATA QUAD
    // -----------------------------------------------------------------------------------
@@ -45,23 +44,33 @@ gpuRenderEngine::gpuRenderEngine( const window& win) : m_window{win}{
    glEnableVertexAttribArray(1);  
 };
 
-
-
-void gpuRenderEngine::draw(surface& surf){
-
-   // Render the screen
-   // Bind the main window framebuffer to draw to the screen
-   glBindFramebuffer(GL_FRAMEBUFFER, 0);
-   // Set the viewport, shader program and VAO with RAII wrappers that will reset to previous
-   // OpenGL states at the end of the scope where they were bound
+void renderSystem::blit(surface& surf, const frameBuffer& target){
+   glBindFramebuffer(GL_FRAMEBUFFER, target.framebuffer());
    GLScopedViewport winViewPort(0, 0, m_window.getWindowSize().x, m_window.getWindowSize().y);
-   GLScopedProgram winProgram(shaderProgramUI);
+   render(surf);
+}
+
+void renderSystem::blit(surface& surf, const frameBuffer& target, float x, float y){
+   glBindFramebuffer(GL_FRAMEBUFFER, target.framebuffer());
+   GLScopedViewport winViewPort(x, y, surf.size().x, surf.size().y);
+   render(surf);
+}
+
+void renderSystem::blit(surface& surf, const frameBuffer& target, float x, float y, float w, float h){
+   glBindFramebuffer(GL_FRAMEBUFFER, target.framebuffer());
+   GLScopedViewport winViewPort(x,y,w,h);
+   render(surf);
+}
+
+void renderSystem::render(surface& surf){
+
+   GLScopedProgram winProgram(m_shaderProgramUI);
    GLScopedVAO tempVAO(m_quadVao);
    // Select texture unit 0 and bind colorTex to GL_TEXTURE_2D on that unit
    glActiveTexture(GL_TEXTURE0);
    GLScopedTexture2D tempTexture(surf.getSurface());
 
-   glUniform1i(glGetUniformLocation(shaderProgramUI, "screenTexture"), 0);
+   glUniform1i(glGetUniformLocation(m_shaderProgramUI, "screenTexture"), 0);
    glDrawArrays(GL_TRIANGLES, 0, 6);
 }
 

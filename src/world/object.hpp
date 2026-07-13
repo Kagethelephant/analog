@@ -1,29 +1,25 @@
 #pragma once
 // Project Libraries
 #include "utils/data.hpp"
+#include "model.hpp"
 // Standard Libraries
 
-#include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
-#include <glm/gtc/quaternion.hpp>
 
 
 
-//---------------------- LIGHTS ----------------------
+class light{
+public:
 
-/// @brief: Point light used for scene shading
-struct light {
-   /// @brief: Create light with starting pos and color
-   /// @param pos: position of the light in world space
-   /// @param col: RGB light color/intensity (0–1 range)
-   light (const glm::vec3& pos, const glm::vec3& col = glm::vec3(1,1,1)) : position{pos}, color{col} {}
-   glm::vec3 position;
-   glm::vec3 color;
+  void setPosition(float x, float y, float z){position = glm::vec4(x,y,z,1.0f);} 
+  void move(float x, float y, float z){position += glm::vec4(x,y,z,1.0f);} 
+  void setColor(float r, float g, float b){color = glm::vec4(r,g,b,1.0f);} 
+
+private:
+   glm::vec4 position;
+   glm::vec4 color = glm::vec4(1.0f,1.0f,1.0f,1.0f);
 };
-
-
-
 
 
 //---------------------- OBJECT ----------------------
@@ -35,7 +31,7 @@ public:
  
    /// @brief: Create object with model reference for geometry
    /// @param model: Model object references for geometry
-   object(std::size_t model) : m_model{model} {
+   object(model m) : m_model{m} {
       m_position = glm::vec3(0,0,0);
       m_rotation = glm::vec3(0,0,0);
       m_scale = glm::vec3(1,1,1);
@@ -63,6 +59,7 @@ public:
 
    void updateModelMatrix();
 
+
    /// @brief: Set color of object that will be drawn if the model does not have a texture
    /// @param _color: color as Color enum: 4 channel hexadecimal color
    void color(Color col) {m_color = col;};
@@ -71,7 +68,10 @@ public:
    /// @brief: get object transformation matrix
    const glm::mat4& getModelMatrix() const {return (m_modelMatrix);};
    /// @brief: Get model referenced by this object
-   const std::size_t getModel() const {return (m_model);};
+   const model getModel() const {return m_model;};
+   const rigidBody getBody() const {return m_body;};
+
+   const glm::vec3& getScale() const {return m_scale;}
 
 private:
 
@@ -84,11 +84,13 @@ private:
    /// @brief: Scale of the object
    glm::vec3 m_scale = glm::vec3(1,1,1);
 
+
    /// @brief: model matrix used in the vertex shader of the rendering pipeline
    glm::mat4 m_modelMatrix;
 
    /// @brief: Reference to object model (geometry and texture data)
-   std::size_t m_model;
+   model m_model;
+   rigidBody m_body;
 };
 
 

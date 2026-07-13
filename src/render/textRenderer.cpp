@@ -1,9 +1,9 @@
-#include "text.hpp"
+#include "textRenderer.hpp"
+
 // Standard Libraries
 #include <iostream>
-// Program headers
 #include <utility>
-#include "window.hpp"
+// Program headers
 #include "render/RAIIWrapper.hpp"
 #include "utils/data.hpp"
 // FreeType Library

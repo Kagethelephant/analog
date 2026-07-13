@@ -18,8 +18,6 @@ void surface::initialize() {
    {
       // Color attachment
       glGenTextures(1, &m_colorTex);
-      std::cout << "FBO size: "
-         << m_size.x << " x " << m_size.y << "\n";
       GLScopedTexture2D tempTexture(m_colorTex);
       glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, m_size.x, m_size.y, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
       glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
@@ -47,7 +45,7 @@ void surface::initialize() {
 }
 
 
-void surface::m_resizeFbo(glm::ivec2 s){
+void surface::resizeFbo(glm::ivec2 s){
 
    m_size = s;
    {

@@ -28,13 +28,15 @@ set(SOURCE_FILES
    src/world/model.cpp
    src/world/object.cpp
    src/world/camera.cpp
+   src/world/scene3D.cpp
    src/window/window.cpp
-   src/window/text.cpp
-   src/render/render.cpp
+   src/render/textRenderer.cpp
+   src/render/renderSystem.cpp
    src/render/surface.cpp
-   src/render/render3D.cpp
+   src/render/meshRenderer.cpp
    src/shaders/shader.cpp
    src/utils/data.cpp
+   src/utils/debug.cpp
 )
 
 # Creates executable from source files

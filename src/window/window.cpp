@@ -3,6 +3,7 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <math.h>
+#include <iostream>
 
 
 window::window(int height){
@@ -13,20 +14,21 @@ window::window(int height){
    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
+
    //---------------------- SET FBO AND WINDOW SIZE ----------------------
    // On start make the window the size of the display
    const GLFWvidmode* mode = glfwGetVideoMode(glfwGetPrimaryMonitor());
-   windowSize.x = mode->width;
-   windowSize.y = mode->height;
+   m_size.x = mode->width;
+   m_size.y = mode->height;
 
    // FBO is the texture that we draw everything to. Lower resolution will give pixelated look
-   aspectRatio = float(windowSize.x) / float(windowSize.y);
+   m_aspectRatio = float(m_size.x) / float(m_size.y);
 
 
    //---------------------- SETUP GLFW ----------------------
 
-   win = glfwCreateWindow(windowSize.x, windowSize.y, "The Game", NULL, NULL);
-   glfwMakeContextCurrent(win);
+   m_win = glfwCreateWindow(m_size.x, m_size.y, "The Game", NULL, NULL);
+   glfwMakeContextCurrent(m_win);
    // Dont let the window height scale below FBO height
    // glfwSetWindowSizeLimits(win, GLFW_DONT_CARE, fboSize.y, GLFW_DONT_CARE, GLFW_DONT_CARE);
    // This disables vsync
@@ -34,23 +36,29 @@ window::window(int height){
    // Initialize GLAD (Loads functions from the GPU)
    gladLoadGL();
 
+
+   std::cout << "OpenGL Vendor:  "<< glGetString(GL_VENDOR)<< "\n";
+   std::cout << "GPU Renderer:   "<< glGetString(GL_RENDERER)<< "\n";
+   std::cout << "OpenGL Version: "<< glGetString(GL_VERSION)<< "\n";
+   std::cout << "GLSL Version:   "<< glGetString(GL_SHADING_LANGUAGE_VERSION)<< "\n";
+
    // Makes it so "this*" can be used to reference the GLFW window in this classes callback functions
-   glfwSetWindowUserPointer(win, this); 
-   glfwSetFramebufferSizeCallback(win, [](GLFWwindow* _win, int w, int h){
+   glfwSetWindowUserPointer(m_win, this); 
+   glfwSetFramebufferSizeCallback(m_win, [](GLFWwindow* _win, int w, int h){
 
       auto* self = static_cast<window*>(glfwGetWindowUserPointer(_win));
       if (!self) return;
 
-      self->windowSize.x  = w;
-      self->windowSize.y = h;
-      self->aspectRatio  = float(w) / float(h);
+      self->m_size.x  = w;
+      self->m_size.y = h;
+      self->m_aspectRatio  = float(w) / float(h);
    });
 
 }
 
 
 bool window::checkKey(int key, KeyMode mode){
-    int current = glfwGetKey(win, key);
+    int current = glfwGetKey(m_win, key);
     int previous = prevKeyState[key];
 
     bool result = false;
@@ -72,30 +80,30 @@ bool window::checkKey(int key, KeyMode mode){
 }
 
 
-void window::frameUpdate(){
+void window::present(){
 
 
 
-   frameTime = glfwGetTime() - currentTime; // In seconds
-   currentTime = glfwGetTime();
-   frameCount++;
+   m_frameTime = glfwGetTime() - m_currentTime; // In seconds
+   m_currentTime = glfwGetTime();
+   m_frameCount++;
    // If a second has passed
-   if (currentTime - lastTime >= 0.2f){
+   if (m_currentTime - m_lastTime >= 0.2f){
       // Calculate FPS and display it (e.g., in the window title or console)
-      fps = (int)frameCount / (currentTime - lastTime);
-      frameCount = 0;
-      lastTime = currentTime;
+      m_fps = (int)m_frameCount / (m_currentTime - m_lastTime);
+      m_frameCount = 0;
+      m_lastTime = m_currentTime;
    }
 
-   glfwSwapBuffers(win);
+   glfwSwapBuffers(m_win);
    glfwPollEvents();
 }
 
 
 window::~window(){
    // Make sure the context is current before deleting GL objects
-   if (win) glfwMakeContextCurrent(win);
-   if (win) glfwDestroyWindow(win);
+   if (m_win) glfwMakeContextCurrent(m_win);
+   if (m_win) glfwDestroyWindow(m_win);
 
    glfwTerminate();
 }

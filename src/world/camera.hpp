@@ -2,7 +2,6 @@
 #pragma once
 // Project Libraries
 #include "glm/ext/matrix_clip_space.hpp"
-
 #include <glm/glm.hpp>
 
 
@@ -58,16 +57,33 @@ public:
 
    /// @brief: Set far plane position of camera, and update projection matrix
    /// @param far: far plane location as float 
-   void setFarPlane(float far) {m_far = far; m_projectionMatrix = glm::perspective(glm::radians(m_fov),m_aspectRatio,m_near,m_far); };
+   void setFarPlane(float far) {
+      m_far = far;
+      m_projectionMatrix = glm::perspective(glm::radians(m_fov),m_aspectRatio,m_near,m_far);
+   };
+
    /// @brief: Set near plane position of camera, and update projection matrix
    /// @param near: near plane location as float 
-   void setNearPlane(float near) {m_near = near; m_projectionMatrix = glm::perspective(glm::radians(m_fov),m_aspectRatio,m_near,m_far); };
+   void setNearPlane(float near) {
+      m_near = near;
+      m_projectionMatrix = glm::perspective(glm::radians(m_fov),m_aspectRatio,m_near,m_far); 
+   };
+
    /// @brief: Set field of view of camera, and update projection matrix
    /// @param fov: field of view of the camera
-   void setFOV(float fov) {m_fov = fov; m_projectionMatrix = glm::perspective(glm::radians(m_fov),m_aspectRatio,m_near,m_far); };
+   void setFOV(float fov) {
+      m_fov = fov; 
+      m_projectionMatrix = glm::perspective(glm::radians(m_fov),m_aspectRatio,m_near,m_far);
+   };
+
    /// @brief: Set aspect ratio (only updates projection matrix if changed)
    /// @param fov: field of view of the camera
-   void setAspectRatio(float ar) {if(m_aspectRatio != ar){ m_aspectRatio = ar; m_projectionMatrix = glm::perspective(glm::radians(m_fov),m_aspectRatio,m_near,m_far); }};
+   void setAspectRatio(float ar) {
+      if(m_aspectRatio != ar){ 
+         m_aspectRatio = ar; 
+         m_projectionMatrix = glm::perspective(glm::radians(m_fov),m_aspectRatio,m_near,m_far); 
+      }
+   };
 
 private:
 
