@@ -3,6 +3,7 @@
 #include <GL/gl.h>
 #include <GLFW/glfw3.h>
 // Project headers
+#include "glm/trigonometric.hpp"
 #include "window/window.hpp"
 #include "render/renderSystem.hpp"
 #include "world/scene3D.hpp"
@@ -40,6 +41,30 @@ int main(int argc, char* argv[]){
    // arcanineObj.updateMassProperties();
    
 
+   object3D c1 = scene.createObject(cubeMod);
+   c1->scale(.2,.2,.2);
+   c1->move(0,4,2);
+   c1->color(Color::White);
+
+   object3D c2 = scene.createObject(cubeMod);
+   c2->scale(.2,.2,.2);
+   c2->move(0,4,-2);
+   c2->color(Color::White);
+
+   object3D c3 = scene.createObject(cubeMod);
+   c3->scale(.2,.2,.2);
+   c3->move(4,0,0);
+   c3->color(Color::White);
+
+   object3D c4 = scene.createObject(cubeMod);
+   c4->scale(.2,.2,.2);
+   c4->move(-4,0,0);
+   c4->color(Color::White);
+
+   object3D c5 = scene.createObject(cubeMod);
+   c5->scale(.2,.2,.2);
+   c5->move(0,0,4);
+   c5->color(Color::White);
 
    object3D cube = scene.createObject(cubeMod);
    cube->move(2,0,-8);
@@ -59,14 +84,14 @@ int main(int argc, char* argv[]){
    tet->move(3,0,-4);
    tet->color(Color::Red);
 
-   object3D sphere = scene.createObject(cylinderMod);
-   sphere->move(7,0,-4);
-   sphere->color(Color::Green);
+   object3D cylinder = scene.createObject(cylinderMod);
+   cylinder->move(7,0,-4);
+   cylinder->color(Color::Green);
 
 
    glm::vec3 force(0.0f,0.0f,-10.0f);
    // glm::vec3 point(0,2,0);
-   glm::vec3 r(-1,1,0);
+   glm::vec3 r(1,.5,0);
 
    // glm::vec3 r = point - glm::vec3(-4,0,-8);
    glm::vec3 t = glm::cross(r,force);
@@ -92,14 +117,15 @@ int main(int argc, char* argv[]){
    light2->setColor(0.6f,0.3f,0.3f);
    light2->setPosition(-15,5,5);
 
-   // light3D light2 = scene.createLight();
-   // scene.createLight(glm::vec3(15,5,5),glm::vec3(0.6,0.3,0.3));
-   // scene.createLight(glm::vec3(-15,5,5),glm::vec3(0.3,0.3,0.6));
+   light3D light3 = scene.createLight();
+   light3->setColor(0.2f,0.2f,0.2f);
+   light3->setPosition(-100,100,-100);
+
 
 
    // Base camera movement speeds (scaled by frame time in the main loop)
    double posSpeed = 10.0f; // Position units / sec
-   double rotSpeed = 3.0f;  // Radians / sec
+   double rotSpeed = 120.0f;  // Radians / sec
    //------------------- PROGRAM LOOP ------------------------
    while(!programWindow.shouldClose()){
 
@@ -109,7 +135,7 @@ int main(int argc, char* argv[]){
       double posDelta = posSpeed * programWindow.getFrameElapsedTime();
       double rotDelta = rotSpeed * programWindow.getFrameElapsedTime();
 
-      glm::vec3 spin = aSpd * (float)programWindow.getFrameElapsedTime();
+      glm::vec3 spin = glm::degrees(aSpd * (float)programWindow.getFrameElapsedTime());
       glm::vec3 move = tSpd * (float)programWindow.getFrameElapsedTime();
       cube->rotate(spin.x,spin.y,spin.z);
       cube->move(move.x, move.y, move.z);

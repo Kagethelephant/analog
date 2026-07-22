@@ -1,5 +1,6 @@
 #pragma once
 // Project Libraries
+#include "glm/fwd.hpp"
 #include "utils/data.hpp"
 #include "model.hpp"
 // Standard Libraries
@@ -9,12 +10,34 @@
 
 
 
+class transform{
+public:
+   glm::vec3 position = glm::vec3(0);
+   glm::quat orientation = glm::quat(1,0,0,0);
+   glm::vec3 scale = glm::vec3(1,1,1);
+
+   void translate(glm::vec3 delta);
+   void scaleBy(glm::vec3 delta);
+
+   void rotateLocal(float degrees, const glm::vec3& axis);
+
+   void rotateWorld(float degrees, const glm::vec3& axis);
+
+   glm::mat4 matrix() const;
+
+   glm::vec3 forward() const {return glm::normalize(orientation * glm::vec3(0,0,-1)); };
+   glm::vec3 right() const {return glm::normalize(orientation * glm::vec3(1,0,0)); };
+   glm::vec3 up() const {return glm::normalize(orientation * glm::vec3(0,1,0)); };
+};
+
+
+
 class light{
 public:
 
-  void setPosition(float x, float y, float z){position = glm::vec4(x,y,z,1.0f);} 
-  void move(float x, float y, float z){position += glm::vec4(x,y,z,1.0f);} 
-  void setColor(float r, float g, float b){color = glm::vec4(r,g,b,1.0f);} 
+   void setPosition(float x, float y, float z){position = glm::vec4(x,y,z,1.0f);} 
+   void move(float x, float y, float z){position += glm::vec4(x,y,z,1.0f);} 
+   void setColor(float r, float g, float b){color = glm::vec4(r,g,b,1.0f);} 
 
 private:
    glm::vec4 position;
@@ -57,7 +80,7 @@ public:
    /// @param w: rotation in radians about z axis
    void rotate(float u, float v, float w);
 
-   void updateModelMatrix();
+   // void updateModelMatrix();
 
 
    /// @brief: Set color of object that will be drawn if the model does not have a texture
@@ -66,11 +89,11 @@ public:
    /// @brief: get object color as Color enum: 4 channel hexadecimal color
    Color color() const {return (m_color);};
    /// @brief: get object transformation matrix
-   const glm::mat4& getModelMatrix() const {return (m_modelMatrix);};
+   const glm::mat4 getModelMatrix() const {return (m_transform.matrix());};
+
    /// @brief: Get model referenced by this object
    const model getModel() const {return m_model;};
    const rigidBody getBody() const {return m_body;};
-
    const glm::vec3& getScale() const {return m_scale;}
 
 private:
@@ -91,6 +114,8 @@ private:
    /// @brief: Reference to object model (geometry and texture data)
    model m_model;
    rigidBody m_body;
+
+   transform m_transform;
 };
 
 

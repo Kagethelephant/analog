@@ -61,3 +61,9 @@ void print(double num){
 void print(std::string text){
    std::cout << text << std::endl;
 }
+
+
+
+std::string toString(glm::vec3 v){
+return "(" + std::to_string(v.x) + ", " + std::to_string(v.y) + ", " + std::to_string(v.z) + ")";
+}

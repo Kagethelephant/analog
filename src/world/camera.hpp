@@ -3,6 +3,8 @@
 // Project Libraries
 #include "glm/ext/matrix_clip_space.hpp"
 #include <glm/glm.hpp>
+#include <glm/gtc/quaternion.hpp>
+#include "world/object.hpp"
 
 
 
@@ -20,7 +22,7 @@ public:
    /// @param fov: vertical field of view of the camera in degrees
    camera(float ar = 1, float fov = 70) : m_aspectRatio(ar), m_fov(fov){
       m_projectionMatrix = glm::perspective(glm::radians(m_fov),m_aspectRatio,m_near,m_far);
-      updateView();
+      m_viewMatrix = glm::lookAt( m_transform.position, m_transform.position + m_transform.forward(), m_transform.up());
    }
 
    /// @brief: Moves camera according to the direction the camera is facing. ie. z moves forward
@@ -34,20 +36,9 @@ public:
    /// @param u: Rotate around the right vector of the camera
    /// @param v: Rotate around the up vector of the camera
    /// @param w: Rotate around the forward vector of the camera
-   void rotate(float u, float v, float w);
+   void rotate(float pitch, float yaw, float roll);
 
 
-   void updateView();
-
-   /// @brief: Returns const reference to camera position
-   const glm::vec3& getPosition() const { return (m_position);}
-   /// @brief: Returns const reference to camera rotation
-   const glm::vec3& getRotation() const { return (m_rotation);}
-
-   /// @brief: Returns const reference to camera direction vector
-   const glm::vec3& getForward() const { return m_forward; }
-   const glm::vec3& getRight()   const { return m_right; }
-   const glm::vec3& getUp()      const { return m_up; }
 
    /// @brief: Get camera view matrix
    const glm::mat4& getViewMatrix() const {return (m_viewMatrix);};
@@ -110,10 +101,5 @@ private:
    /// 3D geometry onto a 2D viewport and ensuring consistent rendering between CPU and GPU pipelines.
    glm::mat4 m_projectionMatrix;
 
-   glm::vec3 m_position = glm::vec3(0,0,0);
-   glm::vec3 m_rotation = glm::vec3(0,0,0);
-
-   glm::vec3 m_forward = glm::vec3(0,0,-1);
-   glm::vec3 m_right = glm::vec3(1,0,0);
-   glm::vec3 m_up = glm::vec3(0,1,0);
+   transform m_transform;
 };

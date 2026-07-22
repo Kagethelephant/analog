@@ -15,3 +15,5 @@ void print(float num);
 void print(int num);
 void print(double num);
 void print(std::string num);
+
+std::string toString(glm::vec3 v);
