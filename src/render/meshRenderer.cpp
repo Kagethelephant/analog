@@ -24,9 +24,16 @@ meshRenderer::meshRenderer() {
 void meshRenderer::render(surface& m_renderSurface, scene3D& scene){
 
    camera& cam = scene.getActiveCamera();
+
    std::vector<model>& m_models = scene.getModels();
    std::vector<object>& objects = scene.getObjects();
+
    std::vector<light>& m_lights = scene.getLights();
+   std::vector<gpuLight> lights;
+
+   for (light l : m_lights){
+      lights.emplace_back(l.t.position,l.getColor());
+   }
 
 
    m_renderSurface.resize();
@@ -54,7 +61,7 @@ void meshRenderer::render(surface& m_renderSurface, scene3D& scene){
    glGenBuffers(1, &lightSSBO);
 
    glBindBuffer(GL_SHADER_STORAGE_BUFFER, lightSSBO);
-   glBufferData(GL_SHADER_STORAGE_BUFFER,m_lights.size() * sizeof(light),m_lights.data(),GL_DYNAMIC_DRAW);
+   glBufferData(GL_SHADER_STORAGE_BUFFER,lights.size() * sizeof(gpuLight),lights.data(),GL_DYNAMIC_DRAW);
    glBindBufferBase(GL_SHADER_STORAGE_BUFFER,0,lightSSBO);
 
 

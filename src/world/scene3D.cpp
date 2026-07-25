@@ -1,6 +1,7 @@
 #include "scene3D.hpp"
 
 #include "utils/debug.hpp"
+#include "objLoader.hpp"
 // Program headers
 // OpenGL
 // Std Libraries
@@ -10,7 +11,8 @@
 
 
 model3D scene3D::createModel(const std::string& filename, bool cwWinding){
-   m_models.emplace_back(filename,cwWinding);
+   model m = loadModel(filename,cwWinding);
+   m_models.push_back(m);
    return model3D(m_models.size() - 1);
 }
 
@@ -33,23 +35,3 @@ light3D scene3D::createLight(){
 
 void scene3D::setActiveCamera(camera3D&  cam) {m_activeCamera = cam.getID();}
 
-
-
-// void object3D::updateMassProperties()
-// {
-//    const object& m_object = m_scene->getObjects()[m_index];
-//    const model& m_model = m_scene->getModels()[m_object.getModel()];
-//    const rigidBody& base = m_model.getMassProperties();
-
-//    glm::vec3 scale = m_object.getScale();
-
-//    if(scale.x <= 0 || scale.y <= 0 || scale.z <= 0){
-//       std::cout <<"Negative scale not supported for physics" << std::endl;
-//    }
-//    
-//    m_body = m_model.generateMassProperties(scale);
-
-//    std::cout << std::endl;
-//    printMat3(m_body.inertia);
-//    std::cout << "COM: (" << m_body.com.x << ", "<< m_body.com.y << ", "<< m_body.com.z << ")" << std::endl;
-// }

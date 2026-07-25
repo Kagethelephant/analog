@@ -29,6 +29,8 @@ set(SOURCE_FILES
    src/world/object.cpp
    src/world/camera.cpp
    src/world/scene3D.cpp
+   src/world/objLoader.cpp
+   src/world/transform.cpp
    src/window/window.cpp
    src/render/textRenderer.cpp
    src/render/renderSystem.cpp

@@ -111,15 +111,15 @@ int main(int argc, char* argv[]){
    // Pass same camera, objects, and lights to both renderers to mirror screen output between the two
    light3D light1 = scene.createLight();
    light1->setColor(0.3f,0.3f,0.6f);
-   light1->setPosition(15,5,5);
+   light1->t.translate(glm::vec3(15,5,5));
 
    light3D light2 = scene.createLight();
    light2->setColor(0.6f,0.3f,0.3f);
-   light2->setPosition(-15,5,5);
+   light2->t.translate(glm::vec3(-15,5,5));
 
    light3D light3 = scene.createLight();
    light3->setColor(0.2f,0.2f,0.2f);
-   light3->setPosition(-100,100,-100);
+   light3->t.translate(glm::vec3(-100,100,-100));
 
 
 

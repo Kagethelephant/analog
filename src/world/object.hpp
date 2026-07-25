@@ -3,43 +3,36 @@
 #include "glm/fwd.hpp"
 #include "utils/data.hpp"
 #include "model.hpp"
+#include "physics/collider.hpp"
 // Standard Libraries
 
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
+#include "transform.hpp"
 
 
-class transform{
-public:
-   glm::vec3 position = glm::vec3(0);
-   glm::quat orientation = glm::quat(1,0,0,0);
-   glm::vec3 scale = glm::vec3(1,1,1);
 
-   void translate(glm::vec3 delta);
-   void scaleBy(glm::vec3 delta);
-
-   void rotateLocal(float degrees, const glm::vec3& axis);
-
-   void rotateWorld(float degrees, const glm::vec3& axis);
-
-   glm::mat4 matrix() const;
-
-   glm::vec3 forward() const {return glm::normalize(orientation * glm::vec3(0,0,-1)); };
-   glm::vec3 right() const {return glm::normalize(orientation * glm::vec3(1,0,0)); };
-   glm::vec3 up() const {return glm::normalize(orientation * glm::vec3(0,1,0)); };
-};
 
 
 
 class light{
 public:
 
-   void setPosition(float x, float y, float z){position = glm::vec4(x,y,z,1.0f);} 
-   void move(float x, float y, float z){position += glm::vec4(x,y,z,1.0f);} 
    void setColor(float r, float g, float b){color = glm::vec4(r,g,b,1.0f);} 
+   glm::vec4 getColor() {return color;};
+
+   transform t;
 
 private:
+   glm::vec4 color = glm::vec4(1.0f,1.0f,1.0f,1.0f);
+};
+
+
+class gpuLight{
+public:
+
+   gpuLight(glm::vec3 p,glm::vec4 c ): position(glm::vec4(p,1.0f)), color(glm::vec4(c)){};
    glm::vec4 position;
    glm::vec4 color = glm::vec4(1.0f,1.0f,1.0f,1.0f);
 };
@@ -55,9 +48,6 @@ public:
    /// @brief: Create object with model reference for geometry
    /// @param model: Model object references for geometry
    object(model m) : m_model{m} {
-      m_position = glm::vec3(0,0,0);
-      m_rotation = glm::vec3(0,0,0);
-      m_scale = glm::vec3(1,1,1);
       glm::mat4 m_modelMatrix = glm::mat4(1.0f);
    };
 
@@ -80,8 +70,6 @@ public:
    /// @param w: rotation in radians about z axis
    void rotate(float u, float v, float w);
 
-   // void updateModelMatrix();
-
 
    /// @brief: Set color of object that will be drawn if the model does not have a texture
    /// @param _color: color as Color enum: 4 channel hexadecimal color
@@ -94,18 +82,13 @@ public:
    /// @brief: Get model referenced by this object
    const model getModel() const {return m_model;};
    const rigidBody getBody() const {return m_body;};
-   const glm::vec3& getScale() const {return m_scale;}
+
+   obb box;
 
 private:
 
    /// @brief: Base color to draw the object (this will be shaded by the camera)
    Color m_color = Color::White;
-   /// @brief: Coordinates of the object origin in 3D space
-   glm::vec3 m_position = glm::vec3(0,0,0);
-   /// @brief: Rotation from original orientation in radians
-   glm::vec3 m_rotation = glm::vec3(0,0,0);
-   /// @brief: Scale of the object
-   glm::vec3 m_scale = glm::vec3(1,1,1);
 
 
    /// @brief: model matrix used in the vertex shader of the rendering pipeline
