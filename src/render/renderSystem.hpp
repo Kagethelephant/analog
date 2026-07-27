@@ -19,37 +19,37 @@ class renderSystem {
 
 public:
 
-   /// @brief: Create new GPU rendering engine
-   /// @param cam: Camera to reference for view matrix and window size
-   renderSystem(const window& win);
+    /// @brief: Create new GPU rendering engine
+    /// @param cam: Camera to reference for view matrix and window size
+    renderSystem(const window& win);
 
-   void blit(surface& surf, const frameBuffer& target);
-   void blit(surface& surf, const frameBuffer& target, float x, float y);
-   void blit(surface& surf, const frameBuffer& target, float x, float y, float w, float h);
+    void blit(surface& surf, const frameBuffer& target);
+    void blit(surface& surf, const frameBuffer& target, float x, float y);
+    void blit(surface& surf, const frameBuffer& target, float x, float y, float w, float h);
 
-   void drawScene(surface& surf, scene3D& scene){m_sceneRenderer.render(surf, scene);}
+    void drawScene(surface& surf, scene3D& scene){m_sceneRenderer.render(surf, scene);}
 
 
-   void RenderText(surface& surf,std::string text, float x, float y, Color col = Color::White){
+    void RenderText(surface& surf,std::string text, float x, float y, Color col = Color::White){
 
-      m_textRender.RenderText(surf,text,x,y, col);
-   }
+        m_textRender.RenderText(surf,text,x,y, col);
+    }
 
 private:
 
-   void render(surface& surf);
-   
-   /// @brief: Shader program to render 2D quads with textures
-   GLuint m_shaderProgramUI;
+    void render(surface& surf);
 
-   const window& m_window;
+    /// @brief: Shader program to render 2D quads with textures
+    GLuint m_shaderProgramUI;
 
-   meshRenderer m_sceneRenderer;
-   textRenderEngine m_textRender = textRenderEngine("../resources/font/novem___.ttf");
+    const window& m_window;
 
-   GLuint m_quadVao;
-   GLuint m_quadVbo;
+    meshRenderer m_sceneRenderer;
+    textRenderEngine m_textRender = textRenderEngine("../resources/font/novem___.ttf");
 
-   std::vector<float> m_quad;
+    GLuint m_quadVao;
+    GLuint m_quadVbo;
+
+    std::vector<float> m_quad;
 };
 

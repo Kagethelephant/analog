@@ -8,166 +8,183 @@
 #include "render/renderSystem.hpp"
 #include "world/scene3D.hpp"
 #include "utils/debug.hpp"
+
+#include "physics/gjk.hpp"
 // Standard Libraries
 #include <math.h>
 #include <string>
 #include <iostream>
 
+#include "utils/sphereObjGen.hpp"
+
 
 
 int main(int argc, char* argv[]){
 
-   //------------------- INITIALIZE WINDOW RESOURCES ----------------------
-   window programWindow(800);
+    //------------------- INITIALIZE WINDOW RESOURCES ----------------------
+    window programWindow(800);
 
-   surface renderSurface(programWindow,800,surface::resizeMode::fixedHeight);
+    surface renderSurface(programWindow,800,surface::resizeMode::fixedHeight);
 
-   renderSystem gpuRend(programWindow);
-
-
-   scene3D scene;
-   camera3D userCamera = scene.createCamera();
-   camera3D bottomCamera = scene.createCamera();
-   //------------------- CREATE MODELS, OBJECTS AND LIGHTS ------------------------
-   // Models load geometry once and can be used by many objects
-   model3D arcanineModel = scene.createModel("../resources/objects/Arcanine/Arcanine.obj");
-   model3D cubeMod = scene.createModel("../resources/objects/cube.obj");
-   model3D tetMod = scene.createModel("../resources/objects/tetrahedron.obj");
-   model3D cylinderMod = scene.createModel("../resources/objects/cylinder.obj");
-
-   // object3D arcanineObj = scene.createObject(arcanineModel);
-   // arcanineObj->move(-4,0,-10);
-   // arcanineObj->scale(10,10,10);
-   // arcanineObj.updateMassProperties();
-   
-
-   object3D c1 = scene.createObject(cubeMod);
-   c1->scale(.2,.2,.2);
-   c1->move(0,4,2);
-   c1->color(Color::White);
-
-   object3D c2 = scene.createObject(cubeMod);
-   c2->scale(.2,.2,.2);
-   c2->move(0,4,-2);
-   c2->color(Color::White);
-
-   object3D c3 = scene.createObject(cubeMod);
-   c3->scale(.2,.2,.2);
-   c3->move(4,0,0);
-   c3->color(Color::White);
-
-   object3D c4 = scene.createObject(cubeMod);
-   c4->scale(.2,.2,.2);
-   c4->move(-4,0,0);
-   c4->color(Color::White);
-
-   object3D c5 = scene.createObject(cubeMod);
-   c5->scale(.2,.2,.2);
-   c5->move(0,0,4);
-   c5->color(Color::White);
-
-   object3D cube = scene.createObject(cubeMod);
-   cube->move(2,0,-8);
-   cube->color(Color::Yellow);
-
-   object3D cube2 = scene.createObject(cubeMod);
-   cube2->move(-6,0,-4);
-   // cube2->scale(.5,1,.5);
-   cube2->color(Color::Blue);
-
-   object3D cube3 = scene.createObject(cubeMod);
-   cube3->move(-4,0,-8);
-   cube3->scale(4,1,1);
-   cube3->color(Color::Purple);
-
-   object3D tet = scene.createObject(tetMod);
-   tet->move(3,0,-4);
-   tet->color(Color::Red);
-
-   object3D cylinder = scene.createObject(cylinderMod);
-   cylinder->move(7,0,-4);
-   cylinder->color(Color::Green);
+    renderSystem gpuRend(programWindow);
 
 
-   glm::vec3 force(0.0f,0.0f,-10.0f);
-   // glm::vec3 point(0,2,0);
-   glm::vec3 r(1,.5,0);
+    scene3D scene;
+    camera3D userCamera = scene.createCamera();
+    camera3D bottomCamera = scene.createCamera();
 
-   // glm::vec3 r = point - glm::vec3(-4,0,-8);
-   glm::vec3 t = glm::cross(r,force);
-   glm::vec3 a = glm::inverse(cube->getBody().inertia) * t;
-   float accTime = 0.1f;
-   glm::vec3 aSpd = a * accTime;
+    // objGenerator::createSphereOBJ("../resources/objects/sphere/sphere.obj",
+    //                               "../resources/objects/sphere/sphere.mtl",
+    //                               "../resources/objects/sphere/jupiter.jpg",
+    //                               1.0f,200,100);
+    //------------------- CREATE MODELS, OBJECTS AND LIGHTS ------------------------
+    // Models load geometry once and can be used by many objects
+    model3D arcanineModel = scene.createModel("../resources/objects/Arcanine/Arcanine.obj");
+    model3D cubeMod = scene.createModel("../resources/objects/cube.obj");
+    model3D tetMod = scene.createModel("../resources/objects/tetrahedron.obj");
+    model3D cylinderMod = scene.createModel("../resources/objects/cylinder.obj");
+    model3D sphereMod = scene.createModel("../resources/objects/sphere/sphere.obj");
 
-   glm::vec3 acc = force/cube->getBody().mass;
-   glm::vec3 tSpd = acc * accTime * 5.0f;
 
-   
-
-
+    object3D arcanineObj = scene.createObject(arcanineModel);
+    arcanineObj->move(-4,0,-10);
+    arcanineObj->scale(10,10,10);
 
 
-   //------------------- BIND OBJECTS AND LIGHTS TO RENDERERS ------------------------
-   // Pass same camera, objects, and lights to both renderers to mirror screen output between the two
-   light3D light1 = scene.createLight();
-   light1->setColor(0.3f,0.3f,0.6f);
-   light1->t.translate(glm::vec3(15,5,5));
+    object3D c1 = scene.createObject(cubeMod);
+    c1->scale(.2,.2,.2);
+    c1->move(0,4,2);
+    c1->color(Color::White);
 
-   light3D light2 = scene.createLight();
-   light2->setColor(0.6f,0.3f,0.3f);
-   light2->t.translate(glm::vec3(-15,5,5));
+    object3D c2 = scene.createObject(cubeMod);
+    c2->scale(.2,.2,.2);
+    c2->move(0,4,-2);
+    c2->color(Color::White);
 
-   light3D light3 = scene.createLight();
-   light3->setColor(0.2f,0.2f,0.2f);
-   light3->t.translate(glm::vec3(-100,100,-100));
+    object3D c3 = scene.createObject(cubeMod);
+    c3->scale(.2,.2,.2);
+    c3->move(4,0,0);
+    c3->color(Color::White);
+
+    object3D c4 = scene.createObject(cubeMod);
+    c4->scale(.2,.2,.2);
+    c4->move(-4,0,0);
+    c4->color(Color::White);
+
+    object3D c5 = scene.createObject(cubeMod);
+    c5->scale(.2,.2,.2);
+    c5->move(0,0,4);
+    c5->color(Color::White);
+
+    object3D cube = scene.createObject(cubeMod);
+    cube->move(2,0,-8);
+    cube->color(Color::Yellow);
+
+    object3D cube2 = scene.createObject(cubeMod);
+    cube2->move(-6,0,-4);
+    // cube2->scale(.5,1,.5);
+    cube2->color(Color::Blue);
+
+    object3D cube3 = scene.createObject(cubeMod);
+    cube3->scale(1,2,1);
+    cube3->scale(4,1,1);
+    cube3->move(-5,0,-8);
+    cube3->color(Color::Purple);
+
+    object3D tet = scene.createObject(tetMod);
+    tet->move(3,0,-4);
+    tet->color(Color::Red);
+
+    object3D cylinder = scene.createObject(sphereMod);
+    cylinder->move(7,0,-4);
+    cylinder->scale(3,3,3);
+
+
+    glm::vec3 force(-5.0f,0.0f,0.0f);
+    // glm::vec3 point(0,2,0);
+    glm::vec3 r(0,.5,1);
+
+    // glm::vec3 r = point - glm::vec3(-4,0,-8);
+    glm::vec3 t = glm::cross(r,force);
+    glm::vec3 a = glm::inverse(cube->getBody().inertia) * t;
+    float accTime = 0.1f;
+    glm::vec3 aSpd = a * accTime;
+
+    glm::vec3 acc = force/cube->getBody().mass;
+    glm::vec3 tSpd = acc * accTime * 5.0f;
 
 
 
-   // Base camera movement speeds (scaled by frame time in the main loop)
-   double posSpeed = 10.0f; // Position units / sec
-   double rotSpeed = 120.0f;  // Radians / sec
-   //------------------- PROGRAM LOOP ------------------------
-   while(!programWindow.shouldClose()){
-
-      //------------------- USER INPUT ------------------------
-      // Multiply the speed of movement and rotation by the amount of time the last frame took
-      // This will make it so very high and low frame rates will move relatively the same in real time
-      double posDelta = posSpeed * programWindow.getFrameElapsedTime();
-      double rotDelta = rotSpeed * programWindow.getFrameElapsedTime();
-
-      glm::vec3 spin = glm::degrees(aSpd * (float)programWindow.getFrameElapsedTime());
-      glm::vec3 move = tSpd * (float)programWindow.getFrameElapsedTime();
-      cube->rotate(spin.x,spin.y,spin.z);
-      cube->move(move.x, move.y, move.z);
 
 
-      if (programWindow.checkKey(GLFW_KEY_ESCAPE)) {programWindow.close();}
-      if (programWindow.checkKey(GLFW_KEY_S)) {userCamera->move(0, 0, -posDelta);bottomCamera->move(0, 0, -posDelta);}
-      if (programWindow.checkKey(GLFW_KEY_W)) {userCamera->move(0, 0, posDelta);bottomCamera->move(0, 0, posDelta);}
-      if (programWindow.checkKey(GLFW_KEY_A)) {userCamera->move(-posDelta, 0, 0);bottomCamera->move(-posDelta, 0, 0);}
-      if (programWindow.checkKey(GLFW_KEY_D)) {userCamera->move(posDelta, 0, 0); bottomCamera->move(posDelta, 0, 0);}
-      if (programWindow.checkKey(GLFW_KEY_LEFT)) {userCamera->rotate(0, rotDelta, 0);}
-      if (programWindow.checkKey(GLFW_KEY_RIGHT)) {userCamera->rotate(0, -rotDelta, 0);}
-      if (programWindow.checkKey(GLFW_KEY_UP)) {userCamera->rotate(rotDelta, 0, 0);}
-      if (programWindow.checkKey(GLFW_KEY_DOWN)) {userCamera->rotate(-rotDelta, 0, 0);}
 
-      // Update the resolution per fram in case the window changes size
-      const glm::vec2& resolution = renderSurface.size();
+    //------------------- BIND OBJECTS AND LIGHTS TO RENDERERS ------------------------
+    // Pass same camera, objects, and lights to both renderers to mirror screen output between the two
+    light3D light1 = scene.createLight();
+    light1->setColor(0.3f,0.3f,0.6f);
+    light1->t.translate(glm::vec3(15,5,5));
 
-      //------------------- RENDER PIPELINE ------------------------
-      scene.setActiveCamera(userCamera);
-      gpuRend.drawScene(renderSurface,scene);
+    light3D light2 = scene.createLight();
+    light2->setColor(0.6f,0.3f,0.3f);
+    light2->t.translate(glm::vec3(-15,5,5));
 
-      gpuRend.RenderText(renderSurface,"GPU", resolution.x/2.0f, 10,Color::Green);
-      gpuRend.RenderText(renderSurface,"FPS: " + std::to_string(programWindow.getFPS()), 10, 10);
+    light3D light3 = scene.createLight();
+    light3->setColor(0.2f,0.2f,0.2f);
+    light3->t.translate(glm::vec3(-100,100,-100));
 
-      gpuRend.blit(renderSurface,programWindow);
 
-      // Renders the FBO to the screen, checks for events, updates FPS, etc.
-      programWindow.present();
-      // userCamera.updateView();
-   }
+    // Base camera movement speeds (scaled by frame time in the main loop)
+    double posSpeed = 10.0f; // Position units / sec
+    double rotSpeed = 120.0f;  // Radians / sec
+    //------------------- PROGRAM LOOP ------------------------
+    while(!programWindow.shouldClose()){
 
-   return 0;
+        //------------------- USER INPUT ------------------------
+        // Multiply the speed of movement and rotation by the amount of time the last frame took
+        // This will make it so very high and low frame rates will move relatively the same in real time
+        double posDelta = posSpeed * programWindow.getFrameElapsedTime();
+        double rotDelta = rotSpeed * programWindow.getFrameElapsedTime();
+
+        glm::vec3 spin = glm::degrees(aSpd * (float)programWindow.getFrameElapsedTime());
+        glm::vec3 move = tSpd * (float)programWindow.getFrameElapsedTime();
+        cube->rotate(spin.x,spin.y,spin.z);
+        cube->move(move.x, move.y, move.z);
+
+        if (gjk(cube->box, cube3->box)){
+            std::cout << "Collision" << std::endl;
+        }
+        else {
+            // std::cout << "No Collision" << std::endl;
+        }
+
+
+        if (programWindow.checkKey(GLFW_KEY_ESCAPE)) {programWindow.close();}
+        if (programWindow.checkKey(GLFW_KEY_S)) {userCamera->move(0, 0, -posDelta);bottomCamera->move(0, 0, -posDelta);}
+        if (programWindow.checkKey(GLFW_KEY_W)) {userCamera->move(0, 0, posDelta);bottomCamera->move(0, 0, posDelta);}
+        if (programWindow.checkKey(GLFW_KEY_A)) {userCamera->move(-posDelta, 0, 0);bottomCamera->move(-posDelta, 0, 0);}
+        if (programWindow.checkKey(GLFW_KEY_D)) {userCamera->move(posDelta, 0, 0); bottomCamera->move(posDelta, 0, 0);}
+        if (programWindow.checkKey(GLFW_KEY_LEFT)) {userCamera->rotate(0, rotDelta, 0);}
+        if (programWindow.checkKey(GLFW_KEY_RIGHT)) {userCamera->rotate(0, -rotDelta, 0);}
+        if (programWindow.checkKey(GLFW_KEY_UP)) {userCamera->rotate(rotDelta, 0, 0);}
+        if (programWindow.checkKey(GLFW_KEY_DOWN)) {userCamera->rotate(-rotDelta, 0, 0);}
+
+        // Update the resolution per fram in case the window changes size
+        const glm::vec2& resolution = renderSurface.size();
+
+        //------------------- RENDER PIPELINE ------------------------
+        scene.setActiveCamera(userCamera);
+        gpuRend.drawScene(renderSurface,scene);
+
+        gpuRend.RenderText(renderSurface,"GPU", resolution.x/2.0f, 10,Color::Green);
+        gpuRend.RenderText(renderSurface,"FPS: " + std::to_string(programWindow.getFPS()), 10, 10);
+
+        gpuRend.blit(renderSurface,programWindow);
+
+        // Renders the FBO to the screen, checks for events, updates FPS, etc.
+        programWindow.present();
+        // userCamera.updateView();
+    }
+
+    return 0;
 }
 

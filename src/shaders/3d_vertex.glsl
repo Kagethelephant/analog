@@ -11,7 +11,7 @@ uniform mat4x4 project;
 
 void main()
 {
-   TexCoord = aTex;
-   fragPos = vec3( model * vec4(aPos, 1.0f));
-   gl_Position = project * view * model * vec4(aPos, 1.0f);
+    TexCoord = aTex;
+    fragPos = vec3( model * vec4(aPos, 1.0f));
+    gl_Position = project * view * model * vec4(aPos, 1.0f);
 }

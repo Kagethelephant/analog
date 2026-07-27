@@ -20,11 +20,11 @@
 /// @brief: Represents a unique combination of a vertex position index (v) and texture index (t)
 /// for use as a key in unordered_map. operator== is used to compare keys that hash to the same bucket.
 struct vertexKey {
-   int v;
-   int t;
-   bool operator==(const vertexKey& o) const {
-      return v == o.v && t == o.t;
-   }
+    int v;
+    int t;
+    bool operator==(const vertexKey& o) const {
+        return v == o.v && t == o.t;
+    }
 };
 
 
@@ -40,9 +40,9 @@ struct vertexKey {
 ///
 /// This improves distribution across buckets. Collisions are resolved by vertexKey::operator==.
 struct vertexKeyHash {
-   size_t operator()(const vertexKey& k) const {
-      return std::hash<int>()(k.v) ^ (std::hash<int>()(k.t) << 1);
-   }
+    size_t operator()(const vertexKey& k) const {
+        return std::hash<int>()(k.v) ^ (std::hash<int>()(k.t) << 1);
+    }
 };
 
 

@@ -12,73 +12,73 @@
 class surface : public frameBuffer {
 public:
 
-   enum class resizeMode{
-      fixedWidth,
-      fixedHeight
-   };
+    enum class resizeMode{
+        fixedWidth,
+        fixedHeight
+    };
 
-   // Constructors for different surface resize types
-   surface(int w, int h){ initialize(); fixed(w,h); }
-   surface(const frameBuffer& w){ initialize(); match(w); }
-   surface(const frameBuffer& w, int s, resizeMode m){ 
-      initialize(); 
-      if(m == resizeMode::fixedWidth) {
-         matchFixedWidth(w,s);
-      }
-      else{matchFixedHeight(w,s);
-      } 
-   }
+    // Constructors for different surface resize types
+    surface(int w, int h){ initialize(); fixed(w,h); }
+    surface(const frameBuffer& w){ initialize(); match(w); }
+    surface(const frameBuffer& w, int s, resizeMode m){ 
+        initialize(); 
+        if(m == resizeMode::fixedWidth) {
+            matchFixedWidth(w,s);
+        }
+        else{matchFixedHeight(w,s);
+        } 
+    }
 
-   ~surface();
+    ~surface();
 
-   glm::ivec2 size() const override{return m_size;}
-   GLuint getFbo() const {return m_fbo;}
-   GLuint getVao() const {return m_quadVao;}
-   GLuint getSurface() const {return m_colorTex;}
-   float getAspect() const {return static_cast<float>(m_size.x) / m_size.y;}
-
-
-   // Functions for changing the resize mode
-   void fixed(int w, int h){setResizeFunction([=](){return glm::ivec2{w, h};}); resize();}
-   void match(const frameBuffer& surf){setResizeFunction([&surf](){return surf.size();}); resize();}
-
-   void matchFixedHeight(const frameBuffer& surf, int h){
-      
-      setResizeFunction([&surf, h](){
-         auto s = surf.size(); 
-         float aspect = static_cast<float>(s.x) / s.y;
-         return glm::ivec2{h * aspect,h};
-      }); 
-      resize();
-   }
-   void matchFixedWidth(const frameBuffer& surf, int w){
-      setResizeFunction([&surf, w](){
-         auto s = surf.size();
-         float aspect = static_cast<float>(s.x) / s.y;
-         return glm::ivec2{w,w/ aspect};});
-      resize();
-   }
+    glm::ivec2 size() const override{return m_size;}
+    GLuint getFbo() const {return m_fbo;}
+    GLuint getVao() const {return m_quadVao;}
+    GLuint getSurface() const {return m_colorTex;}
+    float getAspect() const {return static_cast<float>(m_size.x) / m_size.y;}
 
 
-   using ResizeFunction = std::function<glm::ivec2()>;
-   void setResizeFunction(ResizeFunction fn){ m_resizeCallback = std::move(fn); }
-   void resize(){ if (!m_resizeCallback) return; resizeFbo(m_resizeCallback()); }
+    // Functions for changing the resize mode
+    void fixed(int w, int h){setResizeFunction([=](){return glm::ivec2{w, h};}); resize();}
+    void match(const frameBuffer& surf){setResizeFunction([&surf](){return surf.size();}); resize();}
 
-   GLuint framebuffer() const override {return m_fbo;}
+    void matchFixedHeight(const frameBuffer& surf, int h){
+
+        setResizeFunction([&surf, h](){
+            auto s = surf.size(); 
+            float aspect = static_cast<float>(s.x) / s.y;
+            return glm::ivec2{h * aspect,h};
+        }); 
+        resize();
+    }
+    void matchFixedWidth(const frameBuffer& surf, int w){
+        setResizeFunction([&surf, w](){
+            auto s = surf.size();
+            float aspect = static_cast<float>(s.x) / s.y;
+            return glm::ivec2{w,w/ aspect};});
+        resize();
+    }
+
+
+    using ResizeFunction = std::function<glm::ivec2()>;
+    void setResizeFunction(ResizeFunction fn){ m_resizeCallback = std::move(fn); }
+    void resize(){ if (!m_resizeCallback) return; resizeFbo(m_resizeCallback()); }
+
+    GLuint framebuffer() const override {return m_fbo;}
 private:
 
-   ResizeFunction m_resizeCallback;
+    ResizeFunction m_resizeCallback;
 
-   void initialize();
-   void resizeFbo(glm::ivec2 s);
+    void initialize();
+    void resizeFbo(glm::ivec2 s);
 
-   glm::ivec2 m_size = glm::ivec2(2,2);
+    glm::ivec2 m_size = glm::ivec2(2,2);
 
-   GLuint m_fbo = 0;
-   GLuint m_colorTex = 0;
-   GLuint m_depthTex = 0;
+    GLuint m_fbo = 0;
+    GLuint m_colorTex = 0;
+    GLuint m_depthTex = 0;
 
-   GLuint m_quadVao;
-   GLuint m_quadVbo;
+    GLuint m_quadVao;
+    GLuint m_quadVbo;
 
 };

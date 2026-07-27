@@ -16,17 +16,18 @@ class meshRenderer {
 
 public:
 
-   /// @brief: Create new GPU rendering engine
-   /// @param cam: Camera to reference for view matrix and window size
-   meshRenderer();
+    /// @brief: Create new GPU rendering engine
+    /// @param cam: Camera to reference for view matrix and window size
+    meshRenderer();
 
-   /// @brief: Render the scene with loaded objects and lights to the window FBO
-   void render(surface& surf, scene3D& scene);
+    /// @brief: Render the scene with loaded objects and lights to the window FBO
+    void render(surface& surf, scene3D& scene);
 
+    void drawObb(object o);
 
 private:
-   
-   /// @brief: OpenGL shader program comprised of vertex and fragment shaders pulled from the .glsl files
-   GLuint m_shaderProgram3D;
+
+    /// @brief: OpenGL shader program comprised of vertex and fragment shaders pulled from the .glsl files
+    GLuint m_shaderProgram3D;
 };
 

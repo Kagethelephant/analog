@@ -39,6 +39,8 @@ set(SOURCE_FILES
    src/shaders/shader.cpp
    src/utils/data.cpp
    src/utils/debug.cpp
+   src/physics/collider.cpp
+   src/physics/gjk.cpp
 )
 
 # Creates executable from source files
