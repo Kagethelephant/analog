@@ -67,3 +67,8 @@ void print(std::string text){
 std::string toString(glm::vec3 v){
     return "(" + std::to_string(v.x) + ", " + std::to_string(v.y) + ", " + std::to_string(v.z) + ")";
 }
+
+void clearTerminal() {
+    // \033[2J clears the screen, \033[1;1H moves the cursor to the top-left
+    std::cout << "\033[2J\033[1;1H"; 
+}

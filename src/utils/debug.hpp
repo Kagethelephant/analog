@@ -17,3 +17,5 @@ void print(double num);
 void print(std::string num);
 
 std::string toString(glm::vec3 v);
+
+void clearTerminal();

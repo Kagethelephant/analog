@@ -29,10 +29,8 @@ struct obb : public collider{
 };
 
 
-class sphereCollider : public collider
-{
-public:
-    sphereCollider(glm::vec3 center, float radius) : m_center(center), m_radius(radius){}
+struct sphereCollider : public collider{
+
 
     glm::vec3 support(const glm::vec3& direction) const override{
         // Avoid normalizing a zero vector
@@ -42,11 +40,8 @@ public:
         return m_center + (direction / length) * m_radius;
     }
 
-    const glm::vec3& getCenter() const override{
-        return m_center;
-    }
+    const glm::vec3& getCenter() const override{ return m_center;}
 
-private:
     glm::vec3 m_center;
     float m_radius;
 };

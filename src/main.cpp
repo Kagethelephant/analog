@@ -22,9 +22,9 @@
 int main(int argc, char* argv[]){
 
     //------------------- INITIALIZE WINDOW RESOURCES ----------------------
-    window programWindow(800);
+    window programWindow(1200);
 
-    surface renderSurface(programWindow,800,surface::resizeMode::fixedHeight);
+    surface renderSurface(programWindow,1200,surface::resizeMode::fixedHeight);
 
     renderSystem gpuRend(programWindow);
 
@@ -46,76 +46,34 @@ int main(int argc, char* argv[]){
     model3D sphereMod = scene.createModel("../resources/objects/sphere/sphere.obj");
 
 
-    object3D arcanineObj = scene.createObject(arcanineModel);
-    arcanineObj->move(-4,0,-10);
-    arcanineObj->scale(10,10,10);
 
-
-    object3D c1 = scene.createObject(cubeMod);
-    c1->scale(.2,.2,.2);
-    c1->move(0,4,2);
-    c1->color(Color::White);
-
-    object3D c2 = scene.createObject(cubeMod);
-    c2->scale(.2,.2,.2);
-    c2->move(0,4,-2);
-    c2->color(Color::White);
-
-    object3D c3 = scene.createObject(cubeMod);
-    c3->scale(.2,.2,.2);
-    c3->move(4,0,0);
-    c3->color(Color::White);
-
-    object3D c4 = scene.createObject(cubeMod);
-    c4->scale(.2,.2,.2);
-    c4->move(-4,0,0);
-    c4->color(Color::White);
-
-    object3D c5 = scene.createObject(cubeMod);
-    c5->scale(.2,.2,.2);
-    c5->move(0,0,4);
-    c5->color(Color::White);
-
-    object3D cube = scene.createObject(cubeMod);
-    cube->move(2,0,-8);
+    object3D cube = scene.createObject(sphereMod);
+    cube->move(0,0,-8);
     cube->color(Color::Yellow);
 
     object3D cube2 = scene.createObject(cubeMod);
-    cube2->move(-6,0,-4);
-    // cube2->scale(.5,1,.5);
+    cube2->move(-2,-2,-10);
     cube2->color(Color::Blue);
 
-    object3D cube3 = scene.createObject(cubeMod);
-    cube3->scale(1,2,1);
-    cube3->scale(4,1,1);
-    cube3->move(-5,0,-8);
-    cube3->color(Color::Purple);
-
-    object3D tet = scene.createObject(tetMod);
-    tet->move(3,0,-4);
-    tet->color(Color::Red);
-
-    object3D cylinder = scene.createObject(sphereMod);
-    cylinder->move(7,0,-4);
-    cylinder->scale(3,3,3);
 
 
-    glm::vec3 force(-5.0f,0.0f,0.0f);
-    // glm::vec3 point(0,2,0);
-    glm::vec3 r(0,.5,1);
+    // glm::vec3 force(-5.0f,0.0f,0.0f);
+    // // glm::vec3 point(0,2,0);
+    // glm::vec3 r(0,.5,1);
 
-    // glm::vec3 r = point - glm::vec3(-4,0,-8);
-    glm::vec3 t = glm::cross(r,force);
-    glm::vec3 a = glm::inverse(cube->getBody().inertia) * t;
-    float accTime = 0.1f;
-    glm::vec3 aSpd = a * accTime;
+    // // glm::vec3 r = point - glm::vec3(-4,0,-8);
+    // glm::vec3 t = glm::cross(r,force);
+    // glm::vec3 a = glm::inverse(cube->getBody().inertia) * t;
+    // float accTime = 0.1f;
+    // glm::vec3 aSpd = a * accTime;
 
-    glm::vec3 acc = force/cube->getBody().mass;
-    glm::vec3 tSpd = acc * accTime * 5.0f;
+    // glm::vec3 acc = force/cube->getBody().mass;
+    // glm::vec3 tSpd = acc * accTime * 5.0f;
 
 
 
-
+    glm::vec3 moveVector(.5,.5,.5);
+    moveVector *= 0.1;
 
 
     //------------------- BIND OBJECTS AND LIGHTS TO RENDERERS ------------------------
@@ -145,17 +103,21 @@ int main(int argc, char* argv[]){
         double posDelta = posSpeed * programWindow.getFrameElapsedTime();
         double rotDelta = rotSpeed * programWindow.getFrameElapsedTime();
 
-        glm::vec3 spin = glm::degrees(aSpd * (float)programWindow.getFrameElapsedTime());
-        glm::vec3 move = tSpd * (float)programWindow.getFrameElapsedTime();
-        cube->rotate(spin.x,spin.y,spin.z);
-        cube->move(move.x, move.y, move.z);
+        glm::vec3 moveDelta = moveVector * (float)programWindow.getFrameElapsedTime();
 
-        if (gjk(cube->box, cube3->box)){
+        // glm::vec3 spin = glm::degrees(aSpd * (float)programWindow.getFrameElapsedTime());
+        // glm::vec3 move = tSpd * (float)programWindow.getFrameElapsedTime();
+        // cube->rotate(spin.x,spin.y,spin.z);
+        // cube->move(move.x, move.y, move.z);
+
+        if (programWindow.checkKey(GLFW_KEY_K)) {cube2->move( moveDelta.x,  moveDelta.y,  moveDelta.z);}
+        if (programWindow.checkKey(GLFW_KEY_J)) {cube2->move(-moveDelta.x, -moveDelta.y, -moveDelta.z);}
+
+        if (gjk(cube->sphere, cube2->box)) {
             std::cout << "Collision" << std::endl;
+            clearTerminal();
         }
-        else {
-            // std::cout << "No Collision" << std::endl;
-        }
+        else clearTerminal();
 
 
         if (programWindow.checkKey(GLFW_KEY_ESCAPE)) {programWindow.close();}
@@ -167,6 +129,7 @@ int main(int argc, char* argv[]){
         if (programWindow.checkKey(GLFW_KEY_RIGHT)) {userCamera->rotate(0, -rotDelta, 0);}
         if (programWindow.checkKey(GLFW_KEY_UP)) {userCamera->rotate(rotDelta, 0, 0);}
         if (programWindow.checkKey(GLFW_KEY_DOWN)) {userCamera->rotate(-rotDelta, 0, 0);}
+
 
         // Update the resolution per fram in case the window changes size
         const glm::vec2& resolution = renderSurface.size();
@@ -182,7 +145,6 @@ int main(int argc, char* argv[]){
 
         // Renders the FBO to the screen, checks for events, updates FPS, etc.
         programWindow.present();
-        // userCamera.updateView();
     }
 
     return 0;

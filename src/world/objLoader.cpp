@@ -1,4 +1,5 @@
 #include "objLoader.hpp"
+#include "glm/ext/quaternion_geometric.hpp"
 #include "model.hpp"
 #include "render/RAIIWrapper.hpp"
 #include "utils/debug.hpp"
@@ -13,6 +14,7 @@
 #include <algorithm>
 #include <string>
 #include <unordered_map>
+#include <algorithm>
 // STB_Image
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
@@ -227,11 +229,13 @@ model loadModel(const std::string& filename, bool cwWinding) {
 
     glm::vec3 min(FLT_MAX);
     glm::vec3 max(-FLT_MAX);
+    float rad = 0;
 
     for (const vertex& v : vertices)
     {
         min = glm::min(min, v.position);
         max = glm::max(max, v.position);
+        rad = std::max(rad, glm::length(v.position));
     }
 
     glm::vec3 localCenter = (max + min) * 0.5f;
@@ -241,6 +245,7 @@ model loadModel(const std::string& filename, bool cwWinding) {
     model mod(subMeshes,vertSubMeshes,vertices,vao,vbo);
     mod.localHalfExtents = localHalfExtents;
     mod.localCenter = localCenter;
+    mod.radius = rad;
     return mod;
 
 }

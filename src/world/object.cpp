@@ -68,26 +68,25 @@ void object::buildObbMesh(){
     corners[6] = box.center + r + u + f;
     corners[7] = box.center - r + u + f;
 
-    const uint32_t indices[] =
-        {
-            // bottom
-            0,1,
-            1,2,
-            2,3,
-            3,0,
+    const uint32_t indices[] ={
+        // bottom
+        0,1,
+        1,2,
+        2,3,
+        3,0,
 
-            // top
-            4,5,
-            5,6,
-            6,7,
-            7,4,
+        // top
+        4,5,
+        5,6,
+        6,7,
+        7,4,
 
-            // vertical
-            0,4,
-            1,5,
-            2,6,
-            3,7
-        };
+        // vertical
+        0,4,
+        1,5,
+        2,6,
+        3,7
+    };
 
 
     glGenVertexArrays(1, &vao);
@@ -106,6 +105,12 @@ void object::buildObbMesh(){
     GLScopedEBO tempEBO(ebo);
 
     glBufferData(GL_ELEMENT_ARRAY_BUFFER,sizeof(indices),indices,GL_STATIC_DRAW);
+
+    sphere.m_center = box.center;
+
+    // !!!!!!!!!!! WARNING: DOES NOT SCALE !!!!!!!!!!!!!!!!!!!
+    // This needs to itterate through scaled vertices to recalculate radius
+    sphere.m_radius = m_model.radius;
 }
 
 
@@ -127,5 +132,7 @@ void object::updateObbMesh(){
     corners[7] = box.center - r + u + f;
     GLScopedVBO tempVBO(vbo);
     glBufferSubData(GL_ARRAY_BUFFER,0,sizeof(corners),corners);
+
+    sphere.m_center = box.center;
 }
 

@@ -77,6 +77,7 @@ public:
     glm::vec3 localHalfExtents;
     /// @brief: Center of the bounding box, not the origin or center of mass
     glm::vec3 localCenter;
+    float radius;
 
 
 private:

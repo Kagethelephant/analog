@@ -95,6 +95,7 @@ public:
     GLuint ebo = 0;
 
     obb box;
+    sphereCollider sphere;
 
     glm::vec3 corners[8];
 
